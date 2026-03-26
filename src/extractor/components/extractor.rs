@@ -9,7 +9,7 @@ use crate::extractor::{
     system::clipboard::{copy_all_snippets_combined, copy_to_clipboard},
     types::{CodeSnippet, ExtractedFile, ProcessingFile},
 };
-use dioxus::html::{FileData, HasFileData};
+use dioxus::html::FileData;
 use dioxus::prelude::*;
 
 //src/playground/app.rs
@@ -43,17 +43,6 @@ pub fn MarkdownCodeExtractor() -> Element {
         if !selected_files.is_empty() {
             read_files(selected_files).await;
         }
-    };
-
-    // Drag and drop handlers
-    let on_drop = move |evt: DragEvent| {
-        let read_files_clone = read_files.clone();
-        spawn(async move {
-            let selected_files = evt.files();
-            if !selected_files.is_empty() {
-                read_files_clone(selected_files).await;
-            }
-        });
     };
 
     files.with(|files_vec| {
