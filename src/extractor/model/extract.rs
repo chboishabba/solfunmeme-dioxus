@@ -2,12 +2,11 @@ use crate::extractor::{
     model::extract_html::extract_code_snippets_from_html,
     types::{CodeSnippet, DocumentSummary, ExtractedFile, ProcessingFile, TestResult},
 };
-use dioxus::{html::FileEngine, prelude::*};
+use dioxus::{html::FileData, prelude::*};
 use gloo_timers::future::TimeoutFuture;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
-    sync::Arc,
 };
 
 // /// Extract code snippets from markdown content
@@ -131,13 +130,12 @@ fn create_default_test_result() -> TestResult {
 
 /// Process files from FileEngine and extract code snippets
 pub async fn process_file_engine(
-    file_engine: Arc<dyn FileEngine>,
+    file_list: Vec<FileData>,
     mut files: Signal<Vec<ExtractedFile>>,
     mut processing_file: Signal<Option<ProcessingFile>>,
 ) {
-    let file_names = file_engine.files();
-
-    for file_name in &file_names {
+    for file in file_list {
+        let file_name = file.name();
         let summary = Some(DocumentSummary {
             total_turns: 9,
             total_code_snippets: 0,
@@ -157,7 +155,7 @@ pub async fn process_file_engine(
         // Small delay for UI responsiveness
         TimeoutFuture::new(50).await;
 
-        if let Some(content) = file_engine.read_file_to_string(file_name).await {
+        if let Ok(content) = file.read_string().await {
             let lines: Vec<&str> = content.lines().collect();
             let total_lines = lines.len();
 

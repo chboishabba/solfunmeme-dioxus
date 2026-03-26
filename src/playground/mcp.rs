@@ -403,7 +403,8 @@ fn QuickInvokeButton(
                 let mut mcp_queries = mcp_queries;
 
                 spawn(async move {
-                    let result = invoke_mcp_tool_with_fallback(tool_name.clone(), arguments).await;
+                    let result =
+                        invoke_mcp_tool_with_fallback(tool_name.clone(), arguments.clone()).await;
                     mcp_queries.write().push(McpQuery {
                         tool_name,
                         parameters: arguments,

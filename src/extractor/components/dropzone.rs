@@ -1,10 +1,8 @@
+use dioxus::html::FileData;
 use dioxus::{html::HasFileData, prelude::*};
-use std::sync::Arc;
-//use crate::extractor::Arc;
-//use crate::extractor::FileEngine;
-use crate::extractor::components::dropzone::dioxus_elements::FileEngine;
+
 #[component]
-pub fn DropZone(hovered: Signal<bool>, read_files: EventHandler<Arc<dyn FileEngine>>) -> Element {
+pub fn DropZone(hovered: Signal<bool>, read_files: EventHandler<Vec<FileData>>) -> Element {
     rsx! {
         div {
             class: if hovered() { "upload-area drag-over" } else { "upload-area" },
@@ -16,8 +14,9 @@ pub fn DropZone(hovered: Signal<bool>, read_files: EventHandler<Arc<dyn FileEngi
             ondrop: move |evt| async move {
                 evt.prevent_default();
                 hovered.set(false);
-                if let Some(file_engine) = evt.files() {
-                    read_files.call(file_engine);
+                let selected_files = evt.files();
+                if !selected_files.is_empty() {
+                    read_files.call(selected_files);
                 }
             },
             "🎯 Drop markdown files here or click above to select"

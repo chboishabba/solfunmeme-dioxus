@@ -1,11 +1,12 @@
 // used as embedding app MenuOption::Embedding => rsx!(EmbeddingApp {}) from src/playground/app.rs
 //
-use dioxus::{html::HasFileData, prelude::*};
+use dioxus::{
+    html::{FileData, HasFileData},
+    prelude::*,
+};
 use gloo_timers::future::TimeoutFuture;
-use std::sync::Arc;
 
 use crate::extractor::styles::STYLE;
-use dioxus::html::FileEngine;
 //use crate::extractor::error;
 //use crate::extractor::ProcessingFile;
 use crate::extractor::types::UploadedFile;
@@ -20,19 +21,19 @@ use crate::extractor::types::DocumentSummary;
 use crate::extractor::types::{AnnotatedWord, CodeSnippet, ProcessingFile};
 
 async fn read_files(
-    file_engine: Arc<dyn FileEngine>,
+    file_list: Vec<FileData>,
     currently_processing_file: &mut Signal<Option<ProcessingFile>>,
     files_uploaded: &mut Signal<Vec<UploadedFile>>,
 ) {
-    let files = file_engine.files();
-    for file_name in &files {
+    for file in file_list {
+        let file_name = file.name();
         currently_processing_file.set(Some(ProcessingFile {
             name: file_name.clone(),
             ..Default::default()
         }));
         TimeoutFuture::new(1).await;
 
-        if let Some(contents) = file_engine.read_file_to_string(file_name).await {
+        if let Ok(contents) = file.read_string().await {
             let lines: Vec<&str> = contents.lines().collect();
             let total_lines = lines.len();
 
@@ -117,8 +118,9 @@ async fn upload_files(
     currently_processing_file: &mut Signal<Option<ProcessingFile>>,
     files_uploaded: &mut Signal<Vec<UploadedFile>>,
 ) {
-    if let Some(file_engine) = evt.files() {
-        read_files(file_engine, currently_processing_file, files_uploaded).await;
+    let file_list = evt.files();
+    if !file_list.is_empty() {
+        read_files(file_list, currently_processing_file, files_uploaded).await;
     }
 }
 
@@ -286,8 +288,9 @@ pub fn EmbeddingApp() -> Element {
             ondrop: move |evt| async move {
                 evt.prevent_default();
                 hovered.set(false);
-                if let Some(file_engine) = evt.files() {
-                    read_files(file_engine, &mut currently_processing_file, &mut files_uploaded).await;
+                let selected_files = evt.files();
+                if !selected_files.is_empty() {
+                    read_files(selected_files, &mut currently_processing_file, &mut files_uploaded).await;
                 }
             },
             "Drop files here"

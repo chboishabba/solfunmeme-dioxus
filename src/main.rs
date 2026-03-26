@@ -23,6 +23,7 @@ pub mod fetch_parser;
 mod mcp_gateway;
 pub mod playground;
 pub mod state;
+pub mod stubs;
 
 pub mod core;
 pub mod embedself;
