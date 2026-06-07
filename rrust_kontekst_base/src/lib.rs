@@ -1,12 +1,12 @@
 // rrust_kontekst_base/src/lib.rs - MCP (Model Context Protocol) integration
 // use rrust_kontekst_base::*
+use log::info;
+use serde::Serialize;
+use serde_json::Value;
 use std::collections::HashMap;
-use std::sync::{OnceLock, RwLock};
 use std::future::Future;
 use std::pin::Pin;
-use serde_json::Value;
-use serde::Serialize;
-use log::info;
+use std::sync::{OnceLock, RwLock};
 // Type alias for MCP handlers
 type McpHandler = fn(Value) -> Pin<Box<dyn Future<Output = Result<Value, McpError>> + Send>>;
 
@@ -56,26 +56,25 @@ fn get_or_init_registry() -> &'static RwLock<HashMap<String, (McpToolInfo, McpHa
 
 /// Register an MCP tool with thread safety
 pub fn register_mcp_tool(info: &'static McpToolInfo, handler: McpHandler) -> Result<(), McpError> {
-
     //info!("Register MCP tool: {} -> {}", info.tool_name, info.description);
-    
+
     let registry = get_or_init_registry();
-    
+
     match registry.write() {
         Ok(mut map) => {
             map.insert(info.tool_name.to_string(), (info.clone(), handler));
-      //      info!("Registered MCP tool: {} -> {}", info.tool_name, info.description);
+            //      info!("Registered MCP tool: {} -> {}", info.tool_name, info.description);
 
             Ok(())
         }
-        Err(_) => Err(McpError::RegistryLocked)
+        Err(_) => Err(McpError::RegistryLocked),
     }
 }
 
 /// Get MCP tools by menu type
 pub fn get_mcp_tools(menu_type: &str) -> Result<Vec<McpToolInfo>, McpError> {
     let registry = get_or_init_registry();
-    
+
     match registry.read() {
         Ok(map) => {
             let tools: Vec<McpToolInfo> = map
@@ -90,14 +89,14 @@ pub fn get_mcp_tools(menu_type: &str) -> Result<Vec<McpToolInfo>, McpError> {
                 .collect();
             Ok(tools)
         }
-        Err(_) => Err(McpError::RegistryLocked)
+        Err(_) => Err(McpError::RegistryLocked),
     }
 }
 
 /// Generate MCP tools schema for AI
 pub fn get_mcp_tools_schema(menu_type: &str) -> Result<Value, McpError> {
     let tools = get_mcp_tools(menu_type)?;
-    
+
     let tool_schemas: Vec<Value> = tools
         .into_iter()
         .map(|tool| {
@@ -110,11 +109,11 @@ pub fn get_mcp_tools_schema(menu_type: &str) -> Result<Value, McpError> {
                         serde_json::json!({
                             "type": "string",
                             "description": p
-                        })
+                        }),
                     )
                 })
                 .collect();
-            
+
             serde_json::json!({
                 "name": tool.tool_name,
                 "description": format!("{} {}", tool.emoji, tool.description),
@@ -136,19 +135,17 @@ pub fn get_mcp_tools_schema(menu_type: &str) -> Result<Value, McpError> {
 /// Invoke an MCP tool by name
 pub async fn invoke_mcp_tool(tool_name: &str, params: Value) -> Result<Value, McpError> {
     let registry = get_or_init_registry();
-    
+
     let handler = {
         match registry.read() {
-            Ok(map) => {
-                match map.get(tool_name) {
-                    Some((_, handler)) => *handler,
-                    None => return Err(McpError::NotFound),
-                }
-            }
+            Ok(map) => match map.get(tool_name) {
+                Some((_, handler)) => *handler,
+                None => return Err(McpError::NotFound),
+            },
             Err(_) => return Err(McpError::RegistryLocked),
         }
     };
-    
+
     // Call the handler
     handler(params).await
 }
@@ -156,10 +153,10 @@ pub async fn invoke_mcp_tool(tool_name: &str, params: Value) -> Result<Value, Mc
 /// Get all registered tools (for debugging/admin purposes)
 pub fn list_all_tools() -> Result<Vec<String>, McpError> {
     let registry = get_or_init_registry();
-    
+
     match registry.read() {
         Ok(map) => Ok(map.keys().cloned().collect()),
-        Err(_) => Err(McpError::RegistryLocked)
+        Err(_) => Err(McpError::RegistryLocked),
     }
 }
 
@@ -204,14 +201,14 @@ impl McpConfig {
             ..Default::default()
         }
     }
-    
+
     // FIXME Critical: Box::leak causes permanent memory leaks.
     /// Convert to McpToolInfo for registration
     pub fn to_tool_info(&self, component_name: &'static str) -> McpToolInfo {
         // Convert Vec<String> to &'static [&'static str] - this is a limitation
         // In practice, you might want to use a different approach or Box<[&str]>
         let static_params: &'static [&'static str] = &[]; // Simplified for now
-        
+
         McpToolInfo {
             component_name,
             tool_name: Box::leak(self.tool_name.clone().into_boxed_str()),
@@ -231,7 +228,7 @@ impl McpConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[tokio::test]
     async fn test_registry_operations() {
         let info = McpToolInfo {
@@ -247,24 +244,20 @@ mod tests {
             parameters: &["param1"],
             returns: "test result",
         };
-        
-        let handler: McpHandler = |_params| {
-            Box::pin(async {
-                Ok(serde_json::json!({"result": "test"}))
-            })
-        };
-        
+
+        let handler: McpHandler =
+            |_params| Box::pin(async { Ok(serde_json::json!({"result": "test"})) });
+
         // Test registration
         assert!(register_mcp_tool(&info, handler).is_ok());
-        
+
         // Test retrieval
         let tools = get_mcp_tools("core").unwrap();
         assert_eq!(tools.len(), 1);
         assert_eq!(tools[0].tool_name, "test_tool");
-        
+
         // Test invocation
         let result = invoke_mcp_tool("test_tool", serde_json::json!({})).await;
         assert!(result.is_ok());
     }
 }
-

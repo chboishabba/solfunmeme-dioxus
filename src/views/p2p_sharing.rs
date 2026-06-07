@@ -1,5 +1,5 @@
-use dioxus::prelude::*;
 use crate::model::erdfa::TOKEN_CA;
+use dioxus::prelude::*;
 
 /// P2P data sharing — connect wallet, share/receive tx data, stego storage
 #[component]
@@ -77,4 +77,10 @@ pub fn P2pSharing() -> Element {
     }
 }
 
-crate::register_plugin!("p2p_sharing", "P2P data sharing + stego", crate::plugin::PluginCategory::Data, "🌐", || rsx!{ div{"plugin"} });
+crate::register_plugin!(
+    "p2p_sharing",
+    "P2P data sharing + stego",
+    crate::plugin::PluginCategory::Data,
+    "🌐",
+    || rsx! { div{"plugin"} }
+);

@@ -77,8 +77,6 @@ pub struct OurSourceViewWikwidata;
 #[folder = "src/views/workflow_memes"]
 pub struct OurSourceViewWorkflow;
 
-
-
 pub fn printall() {
     info!("PRINT ALL");
     for file in OurSource::iter() {

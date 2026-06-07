@@ -1,10 +1,10 @@
+use crate::model::storage::{ACTIVE_CONNECTION, CLUSTER_STORAGE, GLOBAL_MESSAGE, WALLET_ADAPTER};
+use crate::{NotificationInfo, SignTxSvg};
 use dioxus::prelude::*;
-use solana_system_interface::instruction as system_instruction;
 use solana_sdk::{pubkey::Pubkey, transaction::Transaction};
+use solana_system_interface::instruction as system_instruction;
 use solana_system_interface::*;
 use wallet_adapter::Utils;
-use crate::model::storage::{ACTIVE_CONNECTION, CLUSTER_STORAGE, GLOBAL_MESSAGE, WALLET_ADAPTER};
-use crate::{NotificationInfo, SignTxSvg,};
 
 #[component]
 pub fn SignTx() -> Element {

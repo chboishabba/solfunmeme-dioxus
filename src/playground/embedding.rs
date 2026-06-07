@@ -1,5 +1,5 @@
+use crate::model::erdfa::{fibonacci_tiers, TOKEN_CA};
 use dioxus::prelude::*;
-use crate::model::erdfa::{TOKEN_CA, fibonacci_tiers};
 
 /// Display token embedding and tier info from erdfa-publish
 #[component]
@@ -17,4 +17,10 @@ pub fn EmbeddingViewer() -> Element {
     }
 }
 
-crate::register_plugin!("embedding", "Token tier viewer", crate::plugin::PluginCategory::Data, "🔢", || rsx!{ div{"plugin"} });
+crate::register_plugin!(
+    "embedding",
+    "Token tier viewer",
+    crate::plugin::PluginCategory::Data,
+    "🔢",
+    || rsx! { div{"plugin"} }
+);

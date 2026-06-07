@@ -3,17 +3,51 @@ pub use dioxus::prelude::*;
 use crate::password_manager::PasswordAppState;
 pub use crate::playground::{
     test_components::ComponentName::{
-        ActionButton, AddClusterModal, CardHeader, ClusterInfo, CodeDisplay, ConnectWalletFirst,
-        ConnectionButtons, CoreButtons, CreateButton, CryptoAppHeader, CryptoButtons,
-        CryptoErrorMessage, CryptoFrontendApp, DecryptionForm, EncryptionForm, ExpressionCard,
-        ExpressionInputs, ExpressionList, ExpressionMetadata, ExpressionTypeSelector, Footer,
-        InputField, InputSection, ManagementButtons, MemeCardHeader, MemesFooter, MetadataInputs,
-        Notification, Notification2, PageNotFound,
-	QueryAccountDialogName, // a name
-	QueryCoinDialog,
-        SearchInput, SignInWithSolana, SignTx, SimilaritySection, SuccessMessage,
-        TextAreaField, TransactionButtons, VectorSpace, WikidataMemeExplorer, WikidataMemeView,
-        WorkflowMemeExplorer, WorkflowMemeView, WorkflowStepView,
+        ActionButton,
+        AddClusterModal,
+        CardHeader,
+        ClusterInfo,
+        CodeDisplay,
+        ConnectWalletFirst,
+        ConnectionButtons,
+        CoreButtons,
+        CreateButton,
+        CryptoAppHeader,
+        CryptoButtons,
+        CryptoErrorMessage,
+        CryptoFrontendApp,
+        DecryptionForm,
+        EncryptionForm,
+        ExpressionCard,
+        ExpressionInputs,
+        ExpressionList,
+        ExpressionMetadata,
+        ExpressionTypeSelector,
+        Footer,
+        InputField,
+        InputSection,
+        ManagementButtons,
+        MemeCardHeader,
+        MemesFooter,
+        MetadataInputs,
+        Notification,
+        Notification2,
+        PageNotFound,
+        QueryAccountDialogName, // a name
+        QueryCoinDialog,
+        SearchInput,
+        SignInWithSolana,
+        SignTx,
+        SimilaritySection,
+        SuccessMessage,
+        TextAreaField,
+        TransactionButtons,
+        VectorSpace,
+        WikidataMemeExplorer,
+        WikidataMemeView,
+        WorkflowMemeExplorer,
+        WorkflowMemeView,
+        WorkflowStepView,
     },
     MenuOption::{
         Airdrop, MemeManagement, Memes, MetaMemeOperations, ReceiveSol, SendSol, StylingAndEmojis,
@@ -91,12 +125,12 @@ pub use serde::{Deserialize, Serialize};
 pub use std::collections::HashMap;
 //pub use crate::password_manager::PasswordApp;
 pub use crate::{
-//    header::{ActiveAccountDropDown, ConnectWalletModalModal, Header},
+    //    header::{ActiveAccountDropDown, ConnectWalletModalModal, Header},
     playground::test_components::ComponentName::{NavWalletItem, PingCluster},
 };
 //pub use crate::model::useConnections;
 pub use crate::{
-//    password_manager::PasswordAppState,
+    //    password_manager::PasswordAppState,
     views::{
         accounts::{Accounts, ClusterSuccess, TokenAccountCard, TxCard},
         workflow_memes::WorkflowStep,

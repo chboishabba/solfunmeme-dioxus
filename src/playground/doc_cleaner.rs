@@ -3,11 +3,13 @@ use dioxus::prelude::*;
 /// View and clean founding documents
 #[component]
 pub fn DocCleaner() -> Element {
-    let docs = use_signal(|| vec![
-        ("README.md", "Project overview"),
-        ("CODEBASE_MAP.md", "33K line inventory"),
-        ("founding_documents/", "Original vision docs"),
-    ]);
+    let docs = use_signal(|| {
+        vec![
+            ("README.md", "Project overview"),
+            ("CODEBASE_MAP.md", "33K line inventory"),
+            ("founding_documents/", "Original vision docs"),
+        ]
+    });
 
     rsx! {
         div { class: "doc-cleaner",
@@ -22,4 +24,10 @@ pub fn DocCleaner() -> Element {
     }
 }
 
-crate::register_plugin!("doc_cleaner", "Founding document browser", crate::plugin::PluginCategory::Data, "📄", || rsx!{ div{"plugin"} });
+crate::register_plugin!(
+    "doc_cleaner",
+    "Founding document browser",
+    crate::plugin::PluginCategory::Data,
+    "📄",
+    || rsx! { div{"plugin"} }
+);

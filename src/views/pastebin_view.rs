@@ -1,5 +1,5 @@
+use crate::model::erdfa::{fibonacci_tiers, PasteStatus, TOKEN_CA};
 use dioxus::prelude::*;
-use crate::model::erdfa::{TOKEN_CA, fibonacci_tiers, PasteStatus};
 
 /// Pastebin view — submit tx data, view submissions, earn bounties
 #[component]
@@ -95,4 +95,10 @@ pub fn Pastebin() -> Element {
     }
 }
 
-crate::register_plugin!("pastebin", "Submit TX data, earn bounties", crate::plugin::PluginCategory::Data, "📋", || rsx!{ div{"plugin"} });
+crate::register_plugin!(
+    "pastebin",
+    "Submit TX data, earn bounties",
+    crate::plugin::PluginCategory::Data,
+    "📋",
+    || rsx! { div{"plugin"} }
+);

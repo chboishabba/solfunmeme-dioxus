@@ -9,7 +9,7 @@
 //! Each plugin proves it does exactly what it says via zkperf witnesses.
 
 use dioxus::prelude::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Plugin metadata — what this module claims to do
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -25,13 +25,13 @@ pub struct PluginMeta {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum PluginCategory {
-    Dao,        // governance, voting, tiers
-    Data,       // pastebin, tx submission, bounties
-    Crypto,     // wallet, encryption, signing
-    Analysis,   // code parsing, coverage, embeddings
-    Viz,        // charts, orbits, animations
-    Meta,       // memes, ontology, MCP
-    Test,       // test harnesses
+    Dao,      // governance, voting, tiers
+    Data,     // pastebin, tx submission, bounties
+    Crypto,   // wallet, encryption, signing
+    Analysis, // code parsing, coverage, embeddings
+    Viz,      // charts, orbits, animations
+    Meta,     // memes, ontology, MCP
+    Test,     // test harnesses
 }
 
 /// Plugin registration — collected at startup via inventory
@@ -52,7 +52,10 @@ pub fn all_plugins() -> Vec<&'static PluginRegistration> {
 
 /// Get plugins by category
 pub fn plugins_by_category(cat: PluginCategory) -> Vec<&'static PluginRegistration> {
-    all_plugins().into_iter().filter(|p| p.meta.category == cat).collect()
+    all_plugins()
+        .into_iter()
+        .filter(|p| p.meta.category == cat)
+        .collect()
 }
 
 /// Plugin browser component — shows all registered plugins with their claims

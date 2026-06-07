@@ -1,9 +1,8 @@
-
+use crate::send_sol_req;
+use crate::Loader;
+use crate::NotificationInfo;
 use crate::SendSvg;
 use crate::UserSvg;
-use crate::Loader;
-use crate::send_sol_req;
-use crate::NotificationInfo;
 use dioxus::prelude::*;
 
 use crate::model::storage::{ACTIVE_CONNECTION, GLOBAL_MESSAGE};

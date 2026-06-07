@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
 // ACTIVE_CONNECTION,GLOBAL_MESSAGE,
+use crate::format_timestamp;
+use crate::model::storage::ACCOUNT_STATE;
+use crate::model::ClusterNetState;
 ///use crate::WalletSvg;
 //use //crate::Loader;
 //use crate::playground::test_components::ComponentName::Airdrop;
@@ -32,13 +35,11 @@ use crate::SignatureSvg;
 use crate::TimestampSvg;
 use crate::UserSvg;
 use crate::WalletSvg;
-use crate::format_timestamp;
-use crate::model::ClusterNetState;
-use crate::model::storage::ACCOUNT_STATE;
 //use crate::model::storage::ACTIVE_CONNECTION;
 use crate::model::storage::CLUSTER_NET_STATE;
-use crate::playground::MenuOption::{Airdrop, ReceiveSol, SendSol};
 use crate::playground::test_components::ComponentName::QueryAccountDialogName;
+use crate::playground::MenuOption::{Airdrop, ReceiveSol, SendSol};
+use crate::request_airdrop;
 use crate::storage::ACTIVE_CONNECTION;
 use crate::storage::GLOBAL_MESSAGE;
 use crate::storage::LOADING;
@@ -51,7 +52,6 @@ use crate::utils::trunk_cluster_name;
 use crate::views::connect_first::ConnectWalletFirst;
 use dioxus::prelude::*;
 use solana_sdk::native_token::LAMPORTS_PER_SOL;
-use crate::request_airdrop;
 
 #[component]
 pub fn AirdropComponent(show_airdrop_modal: Signal<bool>) -> Element {

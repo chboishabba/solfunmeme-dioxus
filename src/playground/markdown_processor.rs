@@ -12,4 +12,10 @@ pub fn MarkdownViewer(content: String) -> Element {
     }
 }
 
-crate::register_plugin!("markdown", "Markdown renderer", crate::plugin::PluginCategory::Data, "📝", || rsx!{ div{"plugin"} });
+crate::register_plugin!(
+    "markdown",
+    "Markdown renderer",
+    crate::plugin::PluginCategory::Data,
+    "📝",
+    || rsx! { div{"plugin"} }
+);

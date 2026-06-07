@@ -1,12 +1,9 @@
 // Re-export shared types from erdfa-publish
 pub use erdfa_publish::ingest::{
-    TOKEN_CA, AUTHOR, MAINNET_RPC,
-    fibonacci_tiers,
-    TxRecord, HolderInfo, IngestState,
-    rank_holders, verify_claim, ClaimMetadata,
-    PasteStatus,
+    fibonacci_tiers, rank_holders, verify_claim, ClaimMetadata, HolderInfo, IngestState,
+    PasteStatus, TxRecord, AUTHOR, MAINNET_RPC, TOKEN_CA,
 };
 
 // Re-export stego types
-pub use erdfa_publish::{StegoPlugin, StegoChain};
-pub use erdfa_publish::{DistributionPlan, DistributionTarget, Platform, AclTier};
+pub use erdfa_publish::{AclTier, DistributionPlan, DistributionTarget, Platform};
+pub use erdfa_publish::{StegoChain, StegoPlugin};

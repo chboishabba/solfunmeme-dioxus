@@ -137,4 +137,10 @@ pub fn BertTestApp() -> Element {
     }
 }
 
-crate::register_plugin!("bert_test", "BERT embedding test", crate::plugin::PluginCategory::Analysis, "🧠", || rsx!{ div{"plugin"} });
+crate::register_plugin!(
+    "bert_test",
+    "BERT embedding test",
+    crate::plugin::PluginCategory::Analysis,
+    "🧠",
+    || rsx! { div{"plugin"} }
+);
