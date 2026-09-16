@@ -6,6 +6,7 @@
 //! - Wallet integration with encrypted secrets
 
 pub mod core;
+pub mod semantic_reader;
 
 // Re-export core functionality
 pub use core::*;
@@ -41,5 +42,4 @@ mod tests {
     }
 }
 pub mod stubs;
-pub mod semantic_reader;
 pub mod visualisation;

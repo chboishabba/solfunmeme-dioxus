@@ -7,6 +7,7 @@ use dioxus::prelude::*;
 //ouse crate::extractor::error;
 //use crate::password_manager::DecryptedEntry;
 use crate::password_manager::PasswordAppState;
+use crate::semantic_reader::mabo::MaboSemanticReader;
 // use crate::playground::MenuOption::Airdrop;
 // todo rename : airdrop::Airdrop,
 use crate::views::{
@@ -117,7 +118,6 @@ pub fn PlaygroundApp() -> Element {
     let show_airdrop_modal = use_signal(|| false);
 
     rsx! {
-
     //            link { rel: "stylesheet", href: TAILWIND_CSS }
     //            link { rel: "icon", href: FAVICON }
                 div {

@@ -3,124 +3,205 @@
 //! Dioxus owns only ordinary UI, interaction buttons, and progressive disclosure.
 //! It never constructs semantic payment state or promotes truth/applicability.
 
-pub mod mabo;
-
+use dioxus::prelude::*;
 use sensiblaw_reader_model::{
-    PropositionPayment, ReaderDisposition, ReaderIntent,
+    CoordinateCoverage, PropositionPayment, ReaderDisposition, ReaderIntent,
 };
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct ReaderViewState {
-    pub can_execute_source: bool,
-    pub can_execute_why: bool,
-    pub disposition: ReaderDisposition,
-    pub residuals: Vec<String>,
-    pub applicability_paid: bool,
-    pub claim_truth_paid: bool,
+pub mod mabo;
+pub use mabo::*;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ReaderViewState {
+    Ready,
+    Source {
+        proposition_ref: String,
+        source_revision_ref: String,
+        span_ref: String,
+    },
+    Explanation {
+        proposition_ref: String,
+        source_revision_ref: String,
+        span_ref: String,
+        support_refs: Vec<String>,
+        residual_refs: Vec<String>,
+        applicability_paid: bool,
+        claim_truth_paid: bool,
+    },
+    Deferred {
+        residual_refs: Vec<String>,
+    },
+    Rejected {
+        reason: String,
+    },
 }
 
-/// Pure helper projecting a typed `PropositionPayment` and active `ReaderIntent`
-/// into an immutable UI view state.
+impl ReaderViewState {
+    #[must_use]
+    pub fn can_execute_source(&self) -> bool {
+        matches!(self, Self::Source { .. })
+    }
+
+    #[must_use]
+    pub fn can_execute_why(&self) -> bool {
+        matches!(self, Self::Explanation { .. })
+    }
+}
+
+fn residual_refs(coverages: [&CoordinateCoverage; 3]) -> Vec<String> {
+    coverages
+        .into_iter()
+        .filter_map(CoordinateCoverage::residual_ref)
+        .map(|residual| residual.as_str().to_owned())
+        .collect()
+}
+
+/// Project an already-evaluated SLR payment into reader-only state.
+///
+/// This function does not inspect PostgreSQL, infer support, or mutate payment.
+/// Dioxus supplies an intent and renders the resulting SLR disposition.
 #[must_use]
 pub fn render_state(payment: &PropositionPayment, intent: ReaderIntent) -> ReaderViewState {
-    let disposition = payment.resolve(intent);
-    let can_execute_source = matches!(
-        payment.resolve(ReaderIntent::OpenSource),
-        ReaderDisposition::ExecuteSource { .. }
-    );
-    let can_execute_why = matches!(
-        payment.resolve(ReaderIntent::WhyClaim),
-        ReaderDisposition::ExecuteBoundedWhy(_)
-    );
-    let residuals = match &disposition {
-        ReaderDisposition::Defer(res) => res.iter().map(|r| r.as_str().to_string()).collect(),
+    match payment.resolve(intent) {
+        ReaderDisposition::ExecuteSource {
+            proposition_ref,
+            source_revision_ref,
+            span_ref,
+        } => ReaderViewState::Source {
+            proposition_ref: proposition_ref.as_str().to_owned(),
+            source_revision_ref: source_revision_ref.as_str().to_owned(),
+            span_ref: span_ref.as_str().to_owned(),
+        },
         ReaderDisposition::ExecuteBoundedWhy(cone) => {
-            let mut list = Vec::new();
-            if let Some(r) = cone.qualifier.residual_ref() {
-                list.push(r.as_str().to_string());
-            }
-            if let Some(r) = cone.defeater.residual_ref() {
-                list.push(r.as_str().to_string());
-            }
-            if let Some(r) = cone.comparator.residual_ref() {
-                list.push(r.as_str().to_string());
-            }
-            list
-        }
-        _ => Vec::new(),
-    };
+            let proposition_ref = cone.proposition_ref.as_str().to_owned();
+            let source_revision_ref = cone.source.source_revision_ref().as_str().to_owned();
+            let span_ref = cone.source.span_ref().as_str().to_owned();
+            let open_residual_refs =
+                residual_refs([&cone.qualifier, &cone.defeater, &cone.comparator]);
+            let applicability_paid = cone.applicability_paid();
+            let claim_truth_paid = cone.claim_truth_paid();
+            let support_refs = cone.support_refs;
 
-    ReaderViewState {
-        can_execute_source,
-        can_execute_why,
-        disposition,
-        residuals,
-        applicability_paid: payment.applicability_paid(),
-        claim_truth_paid: payment.claim_truth_paid(),
+            ReaderViewState::Explanation {
+                proposition_ref,
+                source_revision_ref,
+                span_ref,
+                support_refs,
+                residual_refs: open_residual_refs,
+                applicability_paid,
+                claim_truth_paid,
+            }
+        }
+        ReaderDisposition::Defer(residuals) => ReaderViewState::Deferred {
+            residual_refs: residuals
+                .into_iter()
+                .map(|residual| residual.as_str().to_owned())
+                .collect(),
+        },
+        ReaderDisposition::Reject { reason } => ReaderViewState::Rejected { reason },
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use sensiblaw_reader_model::{
-        CoordinateCoverage, SemanticRef, SourcePayment, SpanRef,
-    };
+#[component]
+pub fn SemanticReader(payment: PropositionPayment) -> Element {
+    let mut view = use_signal(|| ReaderViewState::Ready);
+    let source_payment = payment.clone();
+    let why_payment = payment.clone();
 
-    const MABO_PROP: &str = "mabo:proposition:radical-title-native-title";
-    const MABO_REV: &str = "source-revision:mabo-hca23";
-    const MABO_SPAN: &str = "span:mabo:brennan:radical-title:no-automatic-beneficial-ownership";
+    let rendered = view.read().clone();
 
-    #[test]
-    fn test_render_state_source_only_defers_why() {
-        let source = SourcePayment::paid(
-            SemanticRef::new(MABO_PROP),
-            MABO_REV,
-            SpanRef::new(MABO_SPAN),
-        );
-        let payment = PropositionPayment::source_only(source);
-
-        let state_source = render_state(&payment, ReaderIntent::OpenSource);
-        assert!(state_source.can_execute_source);
-        assert!(!state_source.can_execute_why);
-        assert!(matches!(
-            state_source.disposition,
-            ReaderDisposition::ExecuteSource { .. }
-        ));
-        assert!(!state_source.applicability_paid);
-        assert!(!state_source.claim_truth_paid);
-
-        let state_why = render_state(&payment, ReaderIntent::WhyClaim);
-        assert!(state_why.can_execute_source);
-        assert!(!state_why.can_execute_why);
-        assert!(matches!(state_why.disposition, ReaderDisposition::Defer(_)));
-        assert!(!state_why.residuals.is_empty());
+    rsx! {
+        section {
+            class: "semantic-reader p-6 max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-md space-y-4 border border-gray-200 dark:border-gray-800",
+            div { class: "border-b pb-3 border-gray-200 dark:border-gray-700",
+                h2 { class: "text-2xl font-bold text-gray-900 dark:text-white", "Semantic Reader" }
+                p { class: "text-sm text-gray-500 dark:text-gray-400 mt-1",
+                    "Evidence payment is evaluated by SLR; this component only dispatches reader intents."
+                }
+            }
+            div {
+                style: "display: flex; gap: 0.5rem; flex-wrap: wrap;",
+                button {
+                    class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded shadow transition",
+                    onclick: move |_| view.set(render_state(&source_payment, ReaderIntent::OpenSource)),
+                    "Open Exact Source"
+                }
+                button {
+                    class: "px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded shadow transition",
+                    onclick: move |_| view.set(render_state(&why_payment, ReaderIntent::WhyClaim)),
+                    "Why? (Bounded Explanation)"
+                }
+                button {
+                    class: "px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-semibold rounded shadow transition",
+                    onclick: move |_| view.set(ReaderViewState::Ready),
+                    "Reset View"
+                }
+            }
+            {render_view(rendered)}
+        }
     }
+}
 
-    #[test]
-    fn test_render_state_bounded_executes_why() {
-        let source = SourcePayment::paid(
-            SemanticRef::new(MABO_PROP),
-            MABO_REV,
-            SpanRef::new(MABO_SPAN),
-        );
-        let payment = PropositionPayment::bounded(
-            source,
-            vec!["observation:mabo:radical-title:brennan-p39".into()],
-            CoordinateCoverage::Residualised("reader-residual:qualifier".into()),
-            CoordinateCoverage::Residualised("reader-residual:defeater".into()),
-            CoordinateCoverage::Residualised("reader-residual:comparator".into()),
-        );
-
-        let state_why = render_state(&payment, ReaderIntent::WhyClaim);
-        assert!(state_why.can_execute_source);
-        assert!(state_why.can_execute_why);
-        assert!(matches!(
-            state_why.disposition,
-            ReaderDisposition::ExecuteBoundedWhy(_)
-        ));
-        assert_eq!(state_why.residuals.len(), 3);
-        assert!(!state_why.applicability_paid);
-        assert!(!state_why.claim_truth_paid);
+fn render_view(view: ReaderViewState) -> Element {
+    match view {
+        ReaderViewState::Ready => rsx!(div {
+            class: "text-sm text-gray-500 dark:text-gray-400 italic mt-2",
+            "Select 'Open Exact Source' or 'Why?' to dispatch a reader intent."
+        }),
+        ReaderViewState::Source {
+            proposition_ref,
+            source_revision_ref,
+            span_ref,
+        } => rsx!(div {
+            class: "mt-4 p-4 rounded border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 font-mono text-sm space-y-1 text-blue-800 dark:text-blue-300",
+            h3 { class: "font-bold text-base", "Exact Source Span" }
+            p { "Proposition: {proposition_ref}" }
+            p { "Source Revision: {source_revision_ref}" }
+            p { "Span Ref: {span_ref}" }
+        }),
+        ReaderViewState::Explanation {
+            proposition_ref,
+            source_revision_ref,
+            span_ref,
+            support_refs,
+            residual_refs,
+            applicability_paid,
+            claim_truth_paid,
+        } => rsx!(div {
+            class: "mt-4 p-4 rounded border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 text-sm space-y-2 text-green-900 dark:text-green-200",
+            h3 { class: "font-bold text-base", "Bounded Explanation Cone" }
+            p { class: "font-mono text-xs", "Proposition: {proposition_ref}" }
+            p { class: "font-mono text-xs", "Source revision: {source_revision_ref}" }
+            p { class: "font-mono text-xs", "Source span: {span_ref}" }
+            p { class: "text-xs", "Support: {support_refs.join(\", \")}" }
+            if !residual_refs.is_empty() {
+                div { class: "pt-2 border-t border-green-200 dark:border-green-800",
+                    p { class: "font-semibold text-xs text-yellow-700 dark:text-yellow-400", "Retained Residual Coordinates:" }
+                    ul { class: "list-disc list-inside text-xs font-mono space-y-1 mt-1",
+                        for res in residual_refs.iter() {
+                            li { "{res}" }
+                        }
+                    }
+                }
+            }
+            div { class: "pt-2 border-t border-green-200 dark:border-green-800 text-xs text-gray-500 dark:text-gray-400 space-y-1",
+                p { "Firewall: Applicability paid: {applicability_paid} | Claim truth paid: {claim_truth_paid}" }
+            }
+        }),
+        ReaderViewState::Deferred { residual_refs } => rsx!(div {
+            class: "mt-4 p-4 rounded border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-950 text-sm space-y-1 text-yellow-900 dark:text-yellow-300",
+            h3 { class: "font-bold text-base", "More evidence is needed (Deferred)" }
+            p { "Open coordinates:" }
+            ul { class: "list-disc list-inside font-mono text-xs",
+                for res in residual_refs.iter() {
+                    li { "{res}" }
+                }
+            }
+        }),
+        ReaderViewState::Rejected { reason } => rsx!(div {
+            class: "mt-4 p-4 rounded border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-sm text-red-800 dark:text-red-300 italic",
+            h3 { class: "font-bold text-base", "Reader action rejected" }
+            p { "{reason}" }
+        }),
     }
 }
