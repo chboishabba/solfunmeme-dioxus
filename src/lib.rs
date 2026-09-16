@@ -41,3 +41,5 @@ mod tests {
     }
 }
 pub mod stubs;
+pub mod semantic_reader;
+pub mod visualisation;

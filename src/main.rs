@@ -28,6 +28,8 @@ pub mod stubs;
 pub mod core;
 pub mod embedself;
 pub mod plugin;
+pub mod semantic_reader;
+pub mod visualisation;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn spawn_mcp_gateway() {

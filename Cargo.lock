@@ -5195,6 +5195,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "sensiblaw-reader-model"
+version = "0.1.0"
+source = "git+https://github.com/chboishabba/slr.git?branch=agent%2Fmabo-100hop-world-v1#99ff1ef4dce43982c42545f2e3bbf7ed5667f732"
+
+[[package]]
 name = "serde"
 version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7019,6 +7024,7 @@ dependencies = [
  "rrust_kontekst_base",
  "rust-embed",
  "scraper",
+ "sensiblaw-reader-model",
  "serde",
  "serde_json",
  "sha2 0.10.9",

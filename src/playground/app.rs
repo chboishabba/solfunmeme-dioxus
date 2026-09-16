@@ -94,6 +94,7 @@ pub enum MenuOption {
     SolFunMeme,
     #[allow(dead_code)]
     Extractor,
+    SemanticReader,
 }
 
 // extractor gated for wasm
@@ -185,6 +186,7 @@ pub fn PlaygroundApp() -> Element {
                     //                    MenuOption::SolFunMeme => rsx!(SolFunMemeApp {}),
                     MenuOption::SolFunMeme => rsx!( div { "SolFunMeme (loading...)" } ),
                     MenuOption::Extractor => rsx!( div { "Extractor (desktop only)" } ),
+                    MenuOption::SemanticReader => rsx!( crate::semantic_reader::mabo::MaboSemanticReader {} ),
                             _ => rsx!(div { "TODO"})
                         }
                     }
