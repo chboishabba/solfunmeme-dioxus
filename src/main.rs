@@ -15,6 +15,7 @@ mod app;
 use crate::model::NotificationInfo;
 pub(crate) use app::{Route, LOGO};
 mod password_manager;
+pub mod semantic_reader;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod extractor;
