@@ -14,6 +14,7 @@ wallet-adapter = { git = "https://github.com/meta-introspector/SolanaWalletAdapt
 syn-serde = { git = "https://github.com/meta-introspector/syn-serde-rust", branch="main", features = ["json"] }
 dioxus-charts = { git = "https://github.com/dioxus-community/dioxus-charts.git" ,  branch = "main" }
 erdfa-publish = { git = "https://github.com/meta-introspector/erdfa-publish.git", branch = "main", default-features = false, features = ["wasm"] }
+sensiblaw-reader-model = { git = "https://github.com/chboishabba/slr.git", rev = "a05b13726087187e202dbefad1f7f79abd065767" }
 
 ## normal deps 
 inventory = "0.3"
