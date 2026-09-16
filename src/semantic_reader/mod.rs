@@ -54,15 +54,26 @@ pub fn render_state(payment: &PropositionPayment, intent: ReaderIntent) -> Reade
             source_revision_ref: source_revision_ref.as_str().to_owned(),
             span_ref: span_ref.as_str().to_owned(),
         },
-        ReaderDisposition::ExecuteBoundedWhy(cone) => ReaderViewState::Explanation {
-            proposition_ref: cone.proposition_ref.as_str().to_owned(),
-            source_revision_ref: cone.source.source_revision_ref().as_str().to_owned(),
-            span_ref: cone.source.span_ref().as_str().to_owned(),
-            support_refs: cone.support_refs,
-            residual_refs: residual_refs([&cone.qualifier, &cone.defeater, &cone.comparator]),
-            applicability_paid: cone.applicability_paid(),
-            claim_truth_paid: cone.claim_truth_paid(),
-        },
+        ReaderDisposition::ExecuteBoundedWhy(cone) => {
+            let proposition_ref = cone.proposition_ref.as_str().to_owned();
+            let source_revision_ref = cone.source.source_revision_ref().as_str().to_owned();
+            let span_ref = cone.source.span_ref().as_str().to_owned();
+            let open_residual_refs =
+                residual_refs([&cone.qualifier, &cone.defeater, &cone.comparator]);
+            let applicability_paid = cone.applicability_paid();
+            let claim_truth_paid = cone.claim_truth_paid();
+            let support_refs = cone.support_refs;
+
+            ReaderViewState::Explanation {
+                proposition_ref,
+                source_revision_ref,
+                span_ref,
+                support_refs,
+                residual_refs: open_residual_refs,
+                applicability_paid,
+                claim_truth_paid,
+            }
+        }
         ReaderDisposition::Defer(residuals) => ReaderViewState::Deferred {
             residual_refs: residuals
                 .into_iter()
