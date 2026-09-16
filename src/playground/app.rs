@@ -7,6 +7,7 @@ use crate::model::NotificationInfo;
 //ouse crate::extractor::error;
 //use crate::password_manager::DecryptedEntry;
 use crate::password_manager::PasswordAppState;
+use crate::semantic_reader::mabo::MaboSemanticReader;
 // use crate::playground::MenuOption::Airdrop;
 // todo rename : airdrop::Airdrop,
 use crate::views::{
@@ -39,6 +40,8 @@ pub enum MenuOption {
     PerformanceCharts,
     BertTest,
     RustParser,
+    #[allow(dead_code)]
+    SemanticReader,
     #[allow(dead_code)]
     MemeManagement,
     #[allow(dead_code)]
@@ -126,6 +129,10 @@ pub fn PlaygroundApp() -> Element {
                         CoreButtons { on_menu_change: move |opt| menu_option.set(opt) }
                         CryptoButtons { on_menu_change: move |opt| menu_option.set(opt) }
                         ConnectionButtons { on_menu_change: move |opt| menu_option.set(opt) }
+                        button {
+                            onclick: move |_| menu_option.set(MenuOption::SemanticReader),
+                            "Semantic Reader"
+                        }
                     }
                     div {
                         TransactionButtons { on_menu_change: move |opt| menu_option.set(opt) }
@@ -148,6 +155,7 @@ pub fn PlaygroundApp() -> Element {
                 div {
                     class: "{Styles::app_container()}",
                     match *menu_option.read() {
+                        MenuOption::SemanticReader => rsx!(MaboSemanticReader { payment: None }),
                         MenuOption::MemeManagement => rsx!(MemeManagement {}),
                         MenuOption::Memes => rsx!(MemeManagement {}),
                         MenuOption::ExpressionParsing => rsx!(ExpressionParsing {}),
