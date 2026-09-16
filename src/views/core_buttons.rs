@@ -59,10 +59,15 @@ pub fn CoreButtons(on_menu_change: EventHandler<MenuOption>) -> Element {
             onclick: move |_| on_menu_change.call(MenuOption::SolFunMeme),
             "🧬 SOLFUNMEME"
         }
-    button {
+        button {
             class: "{Styles::primary_button()}",
             onclick: move |_| on_menu_change.call(MenuOption::Extractor),
             "Exraction"
+        }
+        button {
+            class: "{Styles::primary_button()}",
+            onclick: move |_| on_menu_change.call(MenuOption::SemanticReader),
+            "📜 Semantic Reader (Mabo)"
         }
     }
 }

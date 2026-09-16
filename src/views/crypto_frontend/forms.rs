@@ -1,7 +1,7 @@
+use super::{components::*, validation::*};
+use crate::crypto::SolanaEncryption;
 use crate::{model::crypto::EncryptedPayload, views::crypto_style::*};
 use dioxus::prelude::*;
-use crate::crypto::SolanaEncryption;
-use super::{components::*, validation::*};
 
 #[component]
 pub fn EncryptionForm() -> Element {

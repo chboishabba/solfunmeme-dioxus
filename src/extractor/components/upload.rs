@@ -27,9 +27,9 @@ pub fn FileUploadArea(
             ondrop: move |evt| async move {
                 evt.prevent_default();
                 on_hover(false);
-                if let Some(file_engine) = evt.files() {
+                if !evt.files().is_empty() {
                     on_drop(evt);
-            //FormEvent::new(evt.data().clone(),true)).await;
+                    //FormEvent::new(evt.data().clone(),true)).await;
                 }
             },
             "🎯 Drop markdown files here or click above to select"

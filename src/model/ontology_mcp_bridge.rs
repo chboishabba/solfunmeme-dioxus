@@ -1,10 +1,13 @@
+use crate::model::{
+    metameme::{MetaMemeOntology, MetaMemes},
+    PrimeOntology, SemanticConcept,
+};
+use rrust_kontekst_base::{McpError, McpToolInfo};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
-use rrust_kontekst_base::{McpToolInfo, McpError};
-use crate::model::{PrimeOntology, metameme::{MetaMemeOntology, MetaMemes}, SemanticConcept};
 use std::future::Future;
 use std::pin::Pin;
-use serde_json::Value;
 
 /// Bridge between ontology systems and MCP protocol
 /// Provides semantic organization and categorization of tools
@@ -210,11 +213,11 @@ impl OntologyMcpBridge {
     pub fn new() -> Self {
         let prime_ontology = PrimeOntology::new();
         let metameme_ontology = MetaMemeOntology::new();
-        
+
         let mut tool_categories = HashMap::new();
         let mut semantic_tool_mapping = HashMap::new();
         let mut ontology_tool_registry = HashMap::new();
-        
+
         // Initialize tool categories based on prime ontology
         for (&prime, concept) in &prime_ontology.semantic_mappings {
             let category = ToolCategory {
@@ -228,7 +231,7 @@ impl OntologyMcpBridge {
             tool_categories.insert(format!("{:?}", concept), category);
             ontology_tool_registry.insert(concept.clone(), Vec::new());
         }
-        
+
         Self {
             prime_ontology,
             metameme_ontology,
@@ -237,33 +240,40 @@ impl OntologyMcpBridge {
             ontology_tool_registry,
         }
     }
-    
+
     /// Registers a tool with semantic context
     pub fn register_semantic_tool(&mut self, tool_info: McpToolInfo) -> Result<String, McpError> {
         let semantic_info = self.analyze_tool_semantics(&tool_info);
         let tool_id = format!("{}::{}", tool_info.component_name, tool_info.tool_name);
-        
+
         // Add tool to appropriate category
-        if let Some(category) = self.tool_categories.get_mut(&format!("{:?}", semantic_info.semantic_category)) {
+        if let Some(category) = self
+            .tool_categories
+            .get_mut(&format!("{:?}", semantic_info.semantic_category))
+        {
             category.tools.push(tool_id.clone());
         }
-        
+
         // Add to ontology registry
-        if let Some(tools) = self.ontology_tool_registry.get_mut(&semantic_info.semantic_category) {
+        if let Some(tools) = self
+            .ontology_tool_registry
+            .get_mut(&semantic_info.semantic_category)
+        {
             tools.push(tool_id.clone());
         }
-        
-        self.semantic_tool_mapping.insert(tool_id.clone(), semantic_info);
-        
+
+        self.semantic_tool_mapping
+            .insert(tool_id.clone(), semantic_info);
+
         Ok(tool_id)
     }
-    
+
     /// Analyzes tool semantics to determine categorization
     fn analyze_tool_semantics(&self, tool_info: &McpToolInfo) -> SemanticToolInfo {
         let semantic_category = self.infer_semantic_category(tool_info);
         let prime_encoding = self.encode_tool_with_primes(tool_info);
         let semantic_vector = self.prime_ontology.encode_concept(tool_info.description);
-        
+
         let ontological_context = OntologicalContext {
             primary_domain: self.map_concept_to_domain(&semantic_category),
             secondary_domains: self.infer_secondary_domains(tool_info),
@@ -271,7 +281,7 @@ impl OntologyMcpBridge {
             abstraction_layer: self.infer_abstraction_layer(tool_info),
             emergence_properties: self.analyze_emergence_properties(tool_info),
         };
-        
+
         SemanticToolInfo {
             base_info: tool_info.clone(),
             semantic_category,
@@ -283,66 +293,99 @@ impl OntologyMcpBridge {
             semantic_relationships: self.find_semantic_relationships(tool_info),
         }
     }
-    
+
     /// Infers semantic category from tool information
     fn infer_semantic_category(&self, tool_info: &McpToolInfo) -> SemanticConcept {
         let description = tool_info.description.to_lowercase();
         let tool_name = tool_info.tool_name.to_lowercase();
-        
+
         // Pattern matching for semantic categorization
-        if description.contains("compile") || description.contains("build") || tool_name.contains("compile") {
+        if description.contains("compile")
+            || description.contains("build")
+            || tool_name.contains("compile")
+        {
             SemanticConcept::Trinity
-        } else if description.contains("proof") || description.contains("theorem") || tool_name.contains("proof") {
+        } else if description.contains("proof")
+            || description.contains("theorem")
+            || tool_name.contains("proof")
+        {
             SemanticConcept::Transcendence
-        } else if description.contains("transform") || description.contains("convert") || tool_name.contains("transform") {
+        } else if description.contains("transform")
+            || description.contains("convert")
+            || tool_name.contains("transform")
+        {
             SemanticConcept::Transformation
-        } else if description.contains("analyze") || description.contains("search") || tool_name.contains("analyze") {
+        } else if description.contains("analyze")
+            || description.contains("search")
+            || tool_name.contains("analyze")
+        {
             SemanticConcept::Star
-        } else if description.contains("manage") || description.contains("coordinate") || tool_name.contains("manage") {
+        } else if description.contains("manage")
+            || description.contains("coordinate")
+            || tool_name.contains("manage")
+        {
             SemanticConcept::CosmicOrder
-        } else if description.contains("create") || description.contains("generate") || tool_name.contains("create") {
+        } else if description.contains("create")
+            || description.contains("generate")
+            || tool_name.contains("create")
+        {
             SemanticConcept::Quintessence
-        } else if description.contains("optimize") || description.contains("complete") || tool_name.contains("optimize") {
+        } else if description.contains("optimize")
+            || description.contains("complete")
+            || tool_name.contains("optimize")
+        {
             SemanticConcept::Completion
-        } else if description.contains("choose") || description.contains("select") || tool_name.contains("choose") {
+        } else if description.contains("choose")
+            || description.contains("select")
+            || tool_name.contains("choose")
+        {
             SemanticConcept::Duality
-        } else if description.contains("init") || description.contains("start") || tool_name.contains("init") {
+        } else if description.contains("init")
+            || description.contains("start")
+            || tool_name.contains("init")
+        {
             SemanticConcept::Unity
         } else {
             SemanticConcept::Void
         }
     }
-    
+
     /// Encodes tool with prime numbers based on characteristics
     fn encode_tool_with_primes(&self, tool_info: &McpToolInfo) -> Vec<u64> {
         let mut encoding = Vec::new();
-        
+
         // Base prime from semantic category
         let semantic_category = self.infer_semantic_category(tool_info);
-        if let Some((&prime, _)) = self.prime_ontology.semantic_mappings.iter()
-            .find(|(_, concept)| **concept == semantic_category) {
+        if let Some((&prime, _)) = self
+            .prime_ontology
+            .semantic_mappings
+            .iter()
+            .find(|(_, concept)| **concept == semantic_category)
+        {
             encoding.push(prime);
         }
-        
+
         // Additional primes based on features
         if tool_info.mcp_enabled {
             encoding.push(2); // Duality for MCP capability
         }
-        
+
         if tool_info.visible {
             encoding.push(3); // Trinity for visibility
         }
-        
+
         // Order influences prime selection
         if tool_info.order > 0 {
-            let order_prime = self.prime_ontology.nearest_prime(tool_info.order as u64)
+            let order_prime = self
+                .prime_ontology
+                .nearest_prime(tool_info.order as u64)
                 .unwrap_or(1);
             encoding.push(order_prime);
         }
-        
+
         encoding
     }
-    
+
     /// Maps semantic concept to ontology domain
     fn map_concept_to_domain(&self, concept: &SemanticConcept) -> OntologyDomain {
         match concept {
@@ -358,27 +401,27 @@ impl OntologyMcpBridge {
             SemanticConcept::CosmicOrder => OntologyDomain::CosmicOrder,
         }
     }
-    
+
     /// Infers secondary domains based on tool complexity
     fn infer_secondary_domains(&self, tool_info: &McpToolInfo) -> Vec<OntologyDomain> {
         let mut domains = Vec::new();
-        
+
         // Complex tools span multiple domains
         if tool_info.parameters.len() > 3 {
             domains.push(OntologyDomain::CosmicOrder);
         }
-        
+
         if tool_info.description.len() > 100 {
             domains.push(OntologyDomain::Completion);
         }
-        
+
         domains
     }
-    
+
     /// Infers conceptual level of the tool
     fn infer_conceptual_level(&self, tool_info: &McpToolInfo) -> ConceptualLevel {
         let description = tool_info.description.to_lowercase();
-        
+
         if description.contains("hardware") || description.contains("system") {
             ConceptualLevel::Hardware
         } else if description.contains("runtime") || description.contains("execution") {
@@ -397,11 +440,11 @@ impl OntologyMcpBridge {
             ConceptualLevel::System
         }
     }
-    
+
     /// Infers abstraction layer
     fn infer_abstraction_layer(&self, tool_info: &McpToolInfo) -> AbstractionLayer {
         let description = tool_info.description.to_lowercase();
-        
+
         if description.contains("physical") || description.contains("hardware") {
             AbstractionLayer::Physical
         } else if description.contains("data") || description.contains("storage") {
@@ -420,26 +463,39 @@ impl OntologyMcpBridge {
             AbstractionLayer::Logic
         }
     }
-    
+
     /// Analyzes emergence properties
     fn analyze_emergence_properties(&self, tool_info: &McpToolInfo) -> EmergenceProperties {
         let description = tool_info.description.to_lowercase();
-        
+
         EmergenceProperties {
-            has_emergent_behavior: description.contains("emergent") || description.contains("complex"),
-            complexity_amplification: if tool_info.parameters.len() > 2 { 1.5 } else { 1.0 },
+            has_emergent_behavior: description.contains("emergent")
+                || description.contains("complex"),
+            complexity_amplification: if tool_info.parameters.len() > 2 {
+                1.5
+            } else {
+                1.0
+            },
             network_effects: description.contains("network") || description.contains("distributed"),
             self_organization: description.contains("self") || description.contains("auto"),
-            adaptive_capacity: if description.contains("adaptive") { 1.0 } else { 0.5 },
-            recursive_depth: if description.contains("recursive") { 3 } else { 1 },
+            adaptive_capacity: if description.contains("adaptive") {
+                1.0
+            } else {
+                0.5
+            },
+            recursive_depth: if description.contains("recursive") {
+                3
+            } else {
+                1
+            },
         }
     }
-    
+
     /// Infers language associations
     fn infer_language_associations(&self, tool_info: &McpToolInfo) -> Vec<MetaMemes> {
         let description = tool_info.description.to_lowercase();
         let mut associations = Vec::new();
-        
+
         if description.contains("rust") {
             associations.push(MetaMemes::Rust);
         }
@@ -455,46 +511,67 @@ impl OntologyMcpBridge {
         if description.contains("llvm") {
             associations.push(MetaMemes::LLVM);
         }
-        
+
         associations
     }
-    
+
     /// Computes complexity score
     fn compute_complexity_score(&self, tool_info: &McpToolInfo) -> f32 {
         let base_score = 0.5;
         let param_score = tool_info.parameters.len() as f32 * 0.1;
         let description_score = (tool_info.description.len() as f32 / 100.0) * 0.2;
         let order_score = (tool_info.order as f32 / 10.0) * 0.1;
-        
+
         base_score + param_score + description_score + order_score
     }
-    
+
     /// Finds semantic relationships with other tools
     fn find_semantic_relationships(&self, tool_info: &McpToolInfo) -> Vec<String> {
         let mut relationships = Vec::new();
-        
+
         // For now, return empty - would need existing tool registry
         // This would be populated as more tools are registered
-        
+
         relationships
     }
-    
+
     /// Gets description for semantic concept
     fn get_concept_description(concept: &SemanticConcept) -> String {
         match concept {
-            SemanticConcept::Void => "Tools for initialization, void operations, and system bootstrapping".to_string(),
-            SemanticConcept::Unity => "Core foundational tools, unity operations, and system unity".to_string(),
-            SemanticConcept::Duality => "Binary operations, choices, comparisons, and dualistic processes".to_string(),
-            SemanticConcept::Trinity => "Compilation, synthesis, transformation, and triadic operations".to_string(),
-            SemanticConcept::Quintessence => "Life cycle management, ecosystem tools, and vital processes".to_string(),
-            SemanticConcept::Completion => "Finalization, optimization, completion, and perfection tools".to_string(),
-            SemanticConcept::Transcendence => "Meta-programming, proofs, transcendent operations, and higher-order tools".to_string(),
-            SemanticConcept::Transformation => "Metamorphosis, evolution, adaptation, and transformative processes".to_string(),
-            SemanticConcept::Star => "Guidance, navigation, discovery, and illumination tools".to_string(),
-            SemanticConcept::CosmicOrder => "Universal structure, coordination, and cosmic ordering tools".to_string(),
+            SemanticConcept::Void => {
+                "Tools for initialization, void operations, and system bootstrapping".to_string()
+            }
+            SemanticConcept::Unity => {
+                "Core foundational tools, unity operations, and system unity".to_string()
+            }
+            SemanticConcept::Duality => {
+                "Binary operations, choices, comparisons, and dualistic processes".to_string()
+            }
+            SemanticConcept::Trinity => {
+                "Compilation, synthesis, transformation, and triadic operations".to_string()
+            }
+            SemanticConcept::Quintessence => {
+                "Life cycle management, ecosystem tools, and vital processes".to_string()
+            }
+            SemanticConcept::Completion => {
+                "Finalization, optimization, completion, and perfection tools".to_string()
+            }
+            SemanticConcept::Transcendence => {
+                "Meta-programming, proofs, transcendent operations, and higher-order tools"
+                    .to_string()
+            }
+            SemanticConcept::Transformation => {
+                "Metamorphosis, evolution, adaptation, and transformative processes".to_string()
+            }
+            SemanticConcept::Star => {
+                "Guidance, navigation, discovery, and illumination tools".to_string()
+            }
+            SemanticConcept::CosmicOrder => {
+                "Universal structure, coordination, and cosmic ordering tools".to_string()
+            }
         }
     }
-    
+
     /// Computes priority based on prime number
     fn compute_priority(prime: u64) -> f32 {
         match prime {
@@ -511,52 +588,56 @@ impl OntologyMcpBridge {
             _ => 0.1,
         }
     }
-    
+
     /// Finds tools by semantic category
     pub fn find_tools_by_concept(&self, concept: &SemanticConcept) -> Vec<&SemanticToolInfo> {
-        self.semantic_tool_mapping.values()
+        self.semantic_tool_mapping
+            .values()
             .filter(|tool| tool.semantic_category == *concept)
             .collect()
     }
-    
+
     /// Recommends tools based on semantic similarity
     pub fn recommend_tools(&self, query: &str, limit: usize) -> Vec<(&String, f32)> {
         let query_encoding = self.prime_ontology.encode_concept(query);
-        
-        let mut similarities: Vec<(&String, f32)> = self.semantic_tool_mapping.iter()
+
+        let mut similarities: Vec<(&String, f32)> = self
+            .semantic_tool_mapping
+            .iter()
             .map(|(name, tool)| {
-                let similarity = self.compute_semantic_similarity(&query_encoding, &tool.semantic_vector);
+                let similarity =
+                    self.compute_semantic_similarity(&query_encoding, &tool.semantic_vector);
                 (name, similarity)
             })
             .collect();
-        
+
         similarities.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
         similarities.truncate(limit);
-        
+
         similarities
     }
-    
+
     /// Computes semantic similarity between vectors
     fn compute_semantic_similarity(&self, vec1: &[f32], vec2: &[f32]) -> f32 {
         if vec1.len() != vec2.len() {
             return 0.0;
         }
-        
+
         let dot_product: f32 = vec1.iter().zip(vec2.iter()).map(|(a, b)| a * b).sum();
         let norm1: f32 = vec1.iter().map(|x| x * x).sum::<f32>().sqrt();
         let norm2: f32 = vec2.iter().map(|x| x * x).sum::<f32>().sqrt();
-        
+
         if norm1 > 0.0 && norm2 > 0.0 {
             dot_product / (norm1 * norm2)
         } else {
             0.0
         }
     }
-    
+
     /// Creates execution context for a tool
     pub fn create_execution_context(&self, tool_name: &str) -> Option<OntologicalExecutionContext> {
         let tool_info = self.semantic_tool_mapping.get(tool_name)?;
-        
+
         let semantic_context = SemanticContext {
             active_concepts: vec![tool_info.semantic_category.clone()],
             conceptual_weights: {
@@ -567,7 +648,7 @@ impl OntologyMcpBridge {
             semantic_momentum: tool_info.semantic_vector.clone(),
             contextual_primes: tool_info.prime_encoding.clone(),
         };
-        
+
         let prime_state = PrimeState {
             active_primes: tool_info.prime_encoding.iter().cloned().collect(),
             prime_activations: {
@@ -580,7 +661,7 @@ impl OntologyMcpBridge {
             harmonic_resonance: 0.618, // Golden ratio
             ontological_stability: 0.8,
         };
-        
+
         Some(OntologicalExecutionContext {
             tool_name: tool_name.to_string(),
             semantic_context,
@@ -624,7 +705,7 @@ mod tests {
     #[test]
     fn test_semantic_tool_registration() {
         let mut bridge = OntologyMcpBridge::new();
-        
+
         let tool_info = McpToolInfo {
             component_name: "test_component",
             tool_name: "compile_tool",
@@ -638,10 +719,10 @@ mod tests {
             parameters: &["source_file", "output_file"],
             returns: "compilation_result",
         };
-        
+
         let result = bridge.register_semantic_tool(tool_info);
         assert!(result.is_ok());
-        
+
         let tool_id = result.unwrap();
         assert!(bridge.semantic_tool_mapping.contains_key(&tool_id));
     }
@@ -649,7 +730,7 @@ mod tests {
     #[test]
     fn test_tool_recommendation() {
         let mut bridge = OntologyMcpBridge::new();
-        
+
         let tool_info = McpToolInfo {
             component_name: "test_component",
             tool_name: "analyze_tool",
@@ -663,9 +744,9 @@ mod tests {
             parameters: &["source_file"],
             returns: "analysis_result",
         };
-        
+
         let _ = bridge.register_semantic_tool(tool_info);
-        
+
         let recommendations = bridge.recommend_tools("analyze code", 5);
         assert!(recommendations.len() > 0);
     }
@@ -673,7 +754,7 @@ mod tests {
     #[test]
     fn test_execution_context_creation() {
         let mut bridge = OntologyMcpBridge::new();
-        
+
         let tool_info = McpToolInfo {
             component_name: "test_component",
             tool_name: "test_tool",
@@ -687,10 +768,10 @@ mod tests {
             parameters: &["input"],
             returns: "output",
         };
-        
+
         let tool_id = bridge.register_semantic_tool(tool_info).unwrap();
         let context = bridge.create_execution_context(&tool_id);
-        
+
         assert!(context.is_some());
         let ctx = context.unwrap();
         assert_eq!(ctx.tool_name, tool_id);

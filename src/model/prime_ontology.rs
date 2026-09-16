@@ -80,7 +80,7 @@ impl PrimeOntology {
     pub fn new() -> Self {
         let primes = vec![0, 1, 2, 3, 5, 7, 11, 13, 17, 23];
         let mut semantic_mappings = HashMap::new();
-        
+
         // Map primes to semantic concepts
         semantic_mappings.insert(0, SemanticConcept::Void);
         semantic_mappings.insert(1, SemanticConcept::Unity);
@@ -107,10 +107,10 @@ impl PrimeOntology {
     /// Computes relationships between all primes in the ontology
     fn compute_relationships(primes: &[u64]) -> HashMap<u64, Vec<PrimeRelation>> {
         let mut relationships = HashMap::new();
-        
+
         for &prime in primes {
             let mut relations = Vec::new();
-            
+
             for &other_prime in primes {
                 if prime != other_prime {
                     // Sequential relationship
@@ -124,7 +124,7 @@ impl PrimeOntology {
                             });
                         }
                     }
-                    
+
                     // Multiplicative relationships
                     if prime != 0 && other_prime != 0 {
                         let product = prime * other_prime;
@@ -133,11 +133,14 @@ impl PrimeOntology {
                                 target_prime: other_prime,
                                 relation_type: RelationType::Multiplicative,
                                 strength: 0.8,
-                                semantic_meaning: format!("Multiplicative: {} * {} = {}", prime, other_prime, product),
+                                semantic_meaning: format!(
+                                    "Multiplicative: {} * {} = {}",
+                                    prime, other_prime, product
+                                ),
                             });
                         }
                     }
-                    
+
                     // Additive relationships
                     let sum = prime + other_prime;
                     if primes.contains(&sum) {
@@ -145,15 +148,18 @@ impl PrimeOntology {
                             target_prime: other_prime,
                             relation_type: RelationType::Additive,
                             strength: 0.6,
-                            semantic_meaning: format!("Additive: {} + {} = {}", prime, other_prime, sum),
+                            semantic_meaning: format!(
+                                "Additive: {} + {} = {}",
+                                prime, other_prime, sum
+                            ),
                         });
                     }
                 }
             }
-            
+
             relationships.insert(prime, relations);
         }
-        
+
         relationships
     }
 
@@ -162,14 +168,14 @@ impl PrimeOntology {
         let dimension_count = primes.len();
         let mut prime_to_dimension = HashMap::new();
         let mut embedding_matrix = vec![vec![0.0; dimension_count]; dimension_count];
-        
+
         // Map each prime to a dimension
         for (i, &prime) in primes.iter().enumerate() {
             prime_to_dimension.insert(prime, i);
-            
+
             // Create orthogonal basis vectors
             embedding_matrix[i][i] = 1.0;
-            
+
             // Add semantic correlations
             for (j, &other_prime) in primes.iter().enumerate() {
                 if i != j {
@@ -178,7 +184,7 @@ impl PrimeOntology {
                 }
             }
         }
-        
+
         PrimeDimensionalStructure {
             dimension_count,
             prime_to_dimension,
@@ -206,21 +212,21 @@ impl PrimeOntology {
     /// Encodes a concept using the prime ontology
     pub fn encode_concept(&self, concept: &str) -> Vec<f32> {
         let mut encoding = vec![0.0; self.primes.len()];
-        
+
         // Simple hash-based encoding for now
         let hash = self.hash_concept(concept);
         for (i, &prime) in self.primes.iter().enumerate() {
             let activation = ((hash + prime as u32) % 100) as f32 / 100.0;
             encoding[i] = activation;
         }
-        
+
         encoding
     }
 
     /// Decodes a prime-based encoding back to semantic concepts
     pub fn decode_to_concepts(&self, encoding: &[f32]) -> Vec<(SemanticConcept, f32)> {
         let mut concepts = Vec::new();
-        
+
         for (i, &activation) in encoding.iter().enumerate() {
             if let Some(&prime) = self.primes.get(i) {
                 if let Some(concept) = self.semantic_mappings.get(&prime) {
@@ -228,7 +234,7 @@ impl PrimeOntology {
                 }
             }
         }
-        
+
         // Sort by activation strength
         concepts.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
         concepts
@@ -236,8 +242,15 @@ impl PrimeOntology {
 
     /// Finds the nearest prime in the ontology
     pub fn nearest_prime(&self, value: u64) -> Option<u64> {
-        self.primes.iter()
-            .min_by_key(|&&prime| if prime >= value { prime - value } else { value - prime })
+        self.primes
+            .iter()
+            .min_by_key(|&&prime| {
+                if prime >= value {
+                    prime - value
+                } else {
+                    value - prime
+                }
+            })
             .copied()
     }
 
@@ -245,19 +258,19 @@ impl PrimeOntology {
     pub fn generate_address(&self, seed: &str) -> Vec<u8> {
         let encoding = self.encode_concept(seed);
         let mut address = Vec::new();
-        
+
         for (i, &activation) in encoding.iter().enumerate() {
             if let Some(&prime) = self.primes.get(i) {
                 let byte_value = ((activation * 255.0) as u8).wrapping_add(prime as u8);
                 address.push(byte_value);
             }
         }
-        
+
         // Extend to 32 bytes for compatibility
         while address.len() < 32 {
             address.push(0);
         }
-        
+
         address.truncate(32);
         address
     }
@@ -276,7 +289,7 @@ impl PrimeOntology {
         // Check if value can be expressed as combinations of our primes
         let mut remaining = value;
         let mut used_primes = HashSet::new();
-        
+
         for &prime in self.primes.iter().rev() {
             if prime <= remaining && prime > 0 {
                 while remaining >= prime {
@@ -285,7 +298,7 @@ impl PrimeOntology {
                 }
             }
         }
-        
+
         remaining == 0 || used_primes.len() >= 2
     }
 
@@ -294,7 +307,7 @@ impl PrimeOntology {
         if !self.primes.contains(&new_prime) {
             self.primes.push(new_prime);
             self.primes.sort_unstable();
-            
+
             // Recompute relationships and dimensional structure
             self.relationships = Self::compute_relationships(&self.primes);
             self.dimensional_structure = Self::create_dimensional_structure(&self.primes);

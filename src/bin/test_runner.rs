@@ -4,7 +4,7 @@ use solfunmeme_dioxus::core::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("🚀 Solfunmeme Test Runner - Comprehensive Coverage Tests");
-//    println!("=".repeat(60));
+    //    println!("=".repeat(60));
 
     // Test 1: Code Vectorization
     test_vectorization()?;
@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     test_code_analysis()?;
 
     // Test 5: Meme Generation
-//    test_meme_generation()?;
+    //    test_meme_generation()?;
 
     // Test 6: Wallet Integration
     test_wallet_integration()?;
@@ -249,7 +249,7 @@ impl Point {
 //     let ecosystem = generator.create_meme_ecosystem(&[analysis.clone()]);
 // //    let memes = generator.generate_meme_from_representation(&analysis);
 // //      let memes = generator.generate_meme_from_declaration(&analysis);
-	
+
 //     assert!(ecosystem.memes.len() > 0);
 //     assert!(memes.len() > 0);
 
@@ -291,7 +291,7 @@ fn test_wallet_integration() -> Result<(), Box<dyn std::error::Error>> {
 
     // Test Solana keys
     wallet.store_solana_key("main_wallet", "test_private_key")?;
-//FIXME:    assert_eq!(wallet.secrets.solana_keys.len(), 1);
+    //FIXME:    assert_eq!(wallet.secrets.solana_keys.len(), 1);
 
     // Test export/import
     let exported = wallet.export_secrets()?;
@@ -320,7 +320,7 @@ fn test_self_analysis() -> Result<(), Box<dyn std::error::Error>> {
     let analysis = analyzer.analyze_file(current_file, "test_runner.rs".to_string())?;
 
     let generator = MemeGenerator::new(256);
-//    let memes = generator.generate_meme_representation(&analysis);
+    //    let memes = generator.generate_meme_representation(&analysis);
     let ecosystem = generator.create_meme_ecosystem(&[analysis.clone()]);
 
     println!("   🔍 Self-Analysis Results:");
@@ -333,14 +333,14 @@ fn test_self_analysis() -> Result<(), Box<dyn std::error::Error>> {
         "      - Complexity Score: {:.2}",
         analysis.metrics.complexity_score
     );
-//    println!("      - Memes Generated: {}", memes.len());
+    //    println!("      - Memes Generated: {}", memes.len());
     println!("      - Ecosystem Size: {}", ecosystem.memes.len());
 
     // Show some memes
     println!("   🎭 Generated Memes:");
-//    for (name, meme) in memes.iter().take(3) {
-//        println!("      - {}", meme);
-//    }
+    //    for (name, meme) in memes.iter().take(3) {
+    //        println!("      - {}", meme);
+    //    }
 
     println!("   ✅ Self analysis tests passed");
     Ok(())

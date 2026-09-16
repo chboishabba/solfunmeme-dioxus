@@ -2,16 +2,12 @@ use crate::extractor::{
     model::{extract::extract_code_snippets, extract_html::extract_code_snippets_from_html},
     types::{ExtractedFile, ProcessingFile},
 };
-use dioxus::{
-    html::FileEngine,
-    prelude::*,
-    signals::{Signal, Writable},
-};
+use dioxus::{html::FileData, prelude::*, signals::Signal};
 use gloo_timers::future::TimeoutFuture;
-use std::{pin::Pin, sync::Arc};
+use std::pin::Pin;
 
 async fn process_file_engine_with_callbacks<F, P>(
-    file_engine: Arc<dyn FileEngine>,
+    file_list: Vec<FileData>,
     mut on_file_start: F,
     mut on_progress: P,
 ) -> Vec<ExtractedFile>
@@ -20,19 +16,18 @@ where
     P: FnMut(&str, usize, usize) + Send,
 {
     let mut extracted_files = Vec::new();
-    let file_names = file_engine.files();
-
-    for file_name in &file_names {
-        if let Some(content) = file_engine.read_file_to_string(file_name).await {
+    for file in file_list {
+        let file_name = file.name();
+        if let Ok(content) = file.read_string().await {
             let lines: Vec<&str> = content.lines().collect();
             let total_lines = lines.len();
 
             // Notify start of file processing
-            on_file_start(file_name, total_lines);
+            on_file_start(&file_name, total_lines);
 
             // Simulate progress updates
             for i in 0..=total_lines {
-                on_progress(file_name, i, total_lines);
+                on_progress(&file_name, i, total_lines);
                 if i % 100 == 0 || i == total_lines {
                     TimeoutFuture::new(10).await;
                 }
@@ -69,12 +64,12 @@ where
 //## Process Files Function
 
 pub async fn process_files(
-    file_engine: Arc<dyn FileEngine>,
+    file_list: Vec<FileData>,
     mut files: Signal<Vec<ExtractedFile>>,
     mut processing_file: Signal<Option<ProcessingFile>>,
 ) {
-    let file_names = file_engine.files();
-    for file_name in &file_names {
+    for file in file_list {
+        let file_name = file.name();
         processing_file.set(Some(ProcessingFile {
             name: file_name.clone(),
             ..Default::default()
@@ -82,7 +77,7 @@ pub async fn process_files(
 
         TimeoutFuture::new(50).await;
 
-        if let Some(content) = file_engine.read_file_to_string(file_name).await {
+        if let Ok(content) = file.read_string().await {
             let lines: Vec<&str> = content.lines().collect();
             let total_lines = lines.len();
 
@@ -117,17 +112,16 @@ pub async fn process_files(
 pub fn create_file_reader(
     mut processing_file: Signal<Option<ProcessingFile>>,
     mut files: Signal<Vec<ExtractedFile>>,
-) -> impl Fn(Arc<dyn FileEngine>) -> Pin<Box<dyn std::future::Future<Output = ()>>> + Clone
+) -> impl Fn(Vec<FileData>) -> Pin<Box<dyn std::future::Future<Output = ()>>> + Clone
 //fn create_file_reader<T>(
 //    mut    processing_file: Signal<Option<ProcessingFile>>,
 //    mut files: Signal<Vec<ExtractedFile>>
 //) -> impl Fn(Arc<dyn FileEngine>) -> Pin<Box<dyn std::future::Future<Output = ()>>> + Clone
 {
-    move |file_engine: Arc<dyn FileEngine>| {
+    move |file_list: Vec<FileData>| {
         Box::pin(async move {
-            let file_names = file_engine.files();
-
-            for file_name in &file_names {
+            for file in file_list {
+                let file_name = file.name();
                 processing_file.set(Some(ProcessingFile {
                     name: file_name.clone(),
                     ..Default::default()
@@ -135,7 +129,7 @@ pub fn create_file_reader(
 
                 TimeoutFuture::new(50).await;
 
-                if let Some(content) = file_engine.read_file_to_string(file_name).await {
+                if let Ok(content) = file.read_string().await {
                     let lines: Vec<&str> = content.lines().collect();
                     let total_lines = lines.len();
 

@@ -1,5 +1,5 @@
-use dioxus::prelude::*;
 use crate::stubs::motion::prelude::*;
+use dioxus::prelude::*;
 use gloo_timers::future::TimeoutFuture;
 use rand::Rng;
 use std::time::Duration;

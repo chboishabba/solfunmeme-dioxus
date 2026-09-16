@@ -21,12 +21,12 @@ pub(crate) const LOGO: Asset = asset!("/assets/logo.png");
 use crate::model::storage::{ACCOUNT_STATE, ACTIVE_CONNECTION, GLOBAL_MESSAGE, WALLET_ADAPTER};
 //use crate::model::storage::{ClusterStore, NotificationInfo};
 //use crate::model::adaptercluster::AdapterCluster;
-use crate::views::{
-    accounts::Accounts, clusters::Clusters, dashboard::Dashboard, extras::Extras,
-    source_browser::SourceBrowser, dao_governance::DaoGovernance,
-    pastebin_view::Pastebin, p2p_sharing::P2pSharing,
-};
 use crate::plugin::PluginBrowser;
+use crate::views::{
+    accounts::Accounts, clusters::Clusters, dao_governance::DaoGovernance, dashboard::Dashboard,
+    extras::Extras, p2p_sharing::P2pSharing, pastebin_view::Pastebin,
+    source_browser::SourceBrowser,
+};
 
 #[component]
 pub(crate) fn MainApp() -> Element {

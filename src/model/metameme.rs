@@ -1,6 +1,6 @@
+use crate::model::prime_ontology::{PrimeOntology, SemanticConcept};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use crate::model::prime_ontology::{PrimeOntology, SemanticConcept};
 
 /// Enhanced MetaMeme ontology with prime number integration
 /// Represents different programming language ASTs and their semantic relationships
@@ -263,81 +263,93 @@ impl MetaMemeOntology {
     pub fn new() -> Self {
         let mut language_mappings = HashMap::new();
         let prime_ontology = PrimeOntology::new();
-        
+
         // Initialize language mappings
-        language_mappings.insert(MetaMemes::Gcc, LanguageSemantics {
-            prime_number: 3,
-            semantic_concept: SemanticConcept::Trinity,
-            ast_node_types: Self::gcc_ast_nodes(),
-            compilation_phases: Self::gcc_compilation_phases(),
-            type_system: TypeSystemInfo {
-                type_theory: TypeTheory::SimpleTypes,
-                inference_capability: InferenceCapability::None,
-                dependent_types: false,
-                linear_types: false,
-                higher_kinded_types: false,
+        language_mappings.insert(
+            MetaMemes::Gcc,
+            LanguageSemantics {
+                prime_number: 3,
+                semantic_concept: SemanticConcept::Trinity,
+                ast_node_types: Self::gcc_ast_nodes(),
+                compilation_phases: Self::gcc_compilation_phases(),
+                type_system: TypeSystemInfo {
+                    type_theory: TypeTheory::SimpleTypes,
+                    inference_capability: InferenceCapability::None,
+                    dependent_types: false,
+                    linear_types: false,
+                    higher_kinded_types: false,
+                },
+                semantic_features: vec![SemanticFeature::MetaProgramming, SemanticFeature::Macros],
             },
-            semantic_features: vec![SemanticFeature::MetaProgramming, SemanticFeature::Macros],
-        });
-        
-        language_mappings.insert(MetaMemes::Rust, LanguageSemantics {
-            prime_number: 5,
-            semantic_concept: SemanticConcept::Quintessence,
-            ast_node_types: Self::rust_ast_nodes(),
-            compilation_phases: Self::rust_compilation_phases(),
-            type_system: TypeSystemInfo {
-                type_theory: TypeTheory::SystemF,
-                inference_capability: InferenceCapability::Local,
-                dependent_types: false,
-                linear_types: true,
-                higher_kinded_types: true,
+        );
+
+        language_mappings.insert(
+            MetaMemes::Rust,
+            LanguageSemantics {
+                prime_number: 5,
+                semantic_concept: SemanticConcept::Quintessence,
+                ast_node_types: Self::rust_ast_nodes(),
+                compilation_phases: Self::rust_compilation_phases(),
+                type_system: TypeSystemInfo {
+                    type_theory: TypeTheory::SystemF,
+                    inference_capability: InferenceCapability::Local,
+                    dependent_types: false,
+                    linear_types: true,
+                    higher_kinded_types: true,
+                },
+                semantic_features: vec![
+                    SemanticFeature::PatternMatching,
+                    SemanticFeature::TypeClasses,
+                    SemanticFeature::Macros,
+                ],
             },
-            semantic_features: vec![
-                SemanticFeature::PatternMatching,
-                SemanticFeature::TypeClasses,
-                SemanticFeature::Macros,
-            ],
-        });
-        
-        language_mappings.insert(MetaMemes::Haskell, LanguageSemantics {
-            prime_number: 17,
-            semantic_concept: SemanticConcept::Star,
-            ast_node_types: Self::haskell_ast_nodes(),
-            compilation_phases: Self::haskell_compilation_phases(),
-            type_system: TypeSystemInfo {
-                type_theory: TypeTheory::SystemF,
-                inference_capability: InferenceCapability::Hindley_Milner,
-                dependent_types: false,
-                linear_types: false,
-                higher_kinded_types: true,
+        );
+
+        language_mappings.insert(
+            MetaMemes::Haskell,
+            LanguageSemantics {
+                prime_number: 17,
+                semantic_concept: SemanticConcept::Star,
+                ast_node_types: Self::haskell_ast_nodes(),
+                compilation_phases: Self::haskell_compilation_phases(),
+                type_system: TypeSystemInfo {
+                    type_theory: TypeTheory::SystemF,
+                    inference_capability: InferenceCapability::Hindley_Milner,
+                    dependent_types: false,
+                    linear_types: false,
+                    higher_kinded_types: true,
+                },
+                semantic_features: vec![
+                    SemanticFeature::Purity,
+                    SemanticFeature::Laziness,
+                    SemanticFeature::TypeClasses,
+                    SemanticFeature::Monads,
+                ],
             },
-            semantic_features: vec![
-                SemanticFeature::Purity,
-                SemanticFeature::Laziness,
-                SemanticFeature::TypeClasses,
-                SemanticFeature::Monads,
-            ],
-        });
-        
-        language_mappings.insert(MetaMemes::Lean4, LanguageSemantics {
-            prime_number: 11,
-            semantic_concept: SemanticConcept::Transcendence,
-            ast_node_types: Self::lean4_ast_nodes(),
-            compilation_phases: Self::lean4_compilation_phases(),
-            type_system: TypeSystemInfo {
-                type_theory: TypeTheory::DependentTypes,
-                inference_capability: InferenceCapability::Dependent,
-                dependent_types: true,
-                linear_types: false,
-                higher_kinded_types: true,
+        );
+
+        language_mappings.insert(
+            MetaMemes::Lean4,
+            LanguageSemantics {
+                prime_number: 11,
+                semantic_concept: SemanticConcept::Transcendence,
+                ast_node_types: Self::lean4_ast_nodes(),
+                compilation_phases: Self::lean4_compilation_phases(),
+                type_system: TypeSystemInfo {
+                    type_theory: TypeTheory::DependentTypes,
+                    inference_capability: InferenceCapability::Dependent,
+                    dependent_types: true,
+                    linear_types: false,
+                    higher_kinded_types: true,
+                },
+                semantic_features: vec![
+                    SemanticFeature::Proofs,
+                    SemanticFeature::DependentTypes,
+                    SemanticFeature::TypeClasses,
+                ],
             },
-            semantic_features: vec![
-                SemanticFeature::Proofs,
-                SemanticFeature::DependentTypes,
-                SemanticFeature::TypeClasses,
-            ],
-        });
-        
+        );
+
         Self {
             language_mappings,
             prime_ontology,
@@ -345,59 +357,59 @@ impl MetaMemeOntology {
             semantic_bridges: Self::initialize_semantic_bridges(),
         }
     }
-    
+
     /// Initialize AST relationships between languages
     fn initialize_ast_relationships() -> HashMap<MetaMemes, Vec<ASTRelation>> {
         let mut relationships = HashMap::new();
-        
+
         // Rust to LLVM compilation
-        relationships.insert(MetaMemes::Rust, vec![
-            ASTRelation {
+        relationships.insert(
+            MetaMemes::Rust,
+            vec![ASTRelation {
                 target_language: MetaMemes::LLVM,
                 relation_type: ASTRelationType::Compilation,
                 mapping_function: "rustc_codegen_llvm".to_string(),
                 semantic_similarity: 0.85,
-            },
-        ]);
-        
+            }],
+        );
+
         // Haskell to GCC compilation
-        relationships.insert(MetaMemes::Haskell, vec![
-            ASTRelation {
+        relationships.insert(
+            MetaMemes::Haskell,
+            vec![ASTRelation {
                 target_language: MetaMemes::Gcc,
                 relation_type: ASTRelationType::Compilation,
                 mapping_function: "ghc_backend".to_string(),
                 semantic_similarity: 0.7,
-            },
-        ]);
-        
+            }],
+        );
+
         relationships
     }
-    
+
     /// Initialize semantic bridges between languages
     fn initialize_semantic_bridges() -> Vec<SemanticBridge> {
-        vec![
-            SemanticBridge {
-                source_language: MetaMemes::Rust,
-                target_language: MetaMemes::Haskell,
-                bridge_type: BridgeType::DirectTranslation,
-                semantic_mappings: vec![
-                    SemanticMapping {
-                        source_concept: "Option<T>".to_string(),
-                        target_concept: "Maybe a".to_string(),
-                        mapping_accuracy: 0.95,
-                        requires_context: false,
-                    },
-                    SemanticMapping {
-                        source_concept: "Result<T, E>".to_string(),
-                        target_concept: "Either a b".to_string(),
-                        mapping_accuracy: 0.9,
-                        requires_context: false,
-                    },
-                ],
-            },
-        ]
+        vec![SemanticBridge {
+            source_language: MetaMemes::Rust,
+            target_language: MetaMemes::Haskell,
+            bridge_type: BridgeType::DirectTranslation,
+            semantic_mappings: vec![
+                SemanticMapping {
+                    source_concept: "Option<T>".to_string(),
+                    target_concept: "Maybe a".to_string(),
+                    mapping_accuracy: 0.95,
+                    requires_context: false,
+                },
+                SemanticMapping {
+                    source_concept: "Result<T, E>".to_string(),
+                    target_concept: "Either a b".to_string(),
+                    mapping_accuracy: 0.9,
+                    requires_context: false,
+                },
+            ],
+        }]
     }
-    
+
     /// GCC AST node types
     fn gcc_ast_nodes() -> Vec<ASTNodeType> {
         vec![
@@ -425,7 +437,7 @@ impl MetaMemeOntology {
             },
         ]
     }
-    
+
     /// Rust AST node types
     fn rust_ast_nodes() -> Vec<ASTNodeType> {
         vec![
@@ -453,41 +465,37 @@ impl MetaMemeOntology {
             },
         ]
     }
-    
+
     /// Haskell AST node types
     fn haskell_ast_nodes() -> Vec<ASTNodeType> {
-        vec![
-            ASTNodeType {
-                name: "fun_bind".to_string(),
-                prime_encoding: vec![17, 11],
-                semantic_weight: 1.0,
-                node_properties: NodeProperties {
-                    is_terminal: false,
-                    can_have_children: true,
-                    semantic_category: SemanticCategory::Declaration,
-                    complexity_score: 0.95,
-                },
+        vec![ASTNodeType {
+            name: "fun_bind".to_string(),
+            prime_encoding: vec![17, 11],
+            semantic_weight: 1.0,
+            node_properties: NodeProperties {
+                is_terminal: false,
+                can_have_children: true,
+                semantic_category: SemanticCategory::Declaration,
+                complexity_score: 0.95,
             },
-        ]
+        }]
     }
-    
+
     /// Lean4 AST node types
     fn lean4_ast_nodes() -> Vec<ASTNodeType> {
-        vec![
-            ASTNodeType {
-                name: "theorem".to_string(),
-                prime_encoding: vec![11, 13],
-                semantic_weight: 1.2,
-                node_properties: NodeProperties {
-                    is_terminal: false,
-                    can_have_children: true,
-                    semantic_category: SemanticCategory::Declaration,
-                    complexity_score: 1.0,
-                },
+        vec![ASTNodeType {
+            name: "theorem".to_string(),
+            prime_encoding: vec![11, 13],
+            semantic_weight: 1.2,
+            node_properties: NodeProperties {
+                is_terminal: false,
+                can_have_children: true,
+                semantic_category: SemanticCategory::Declaration,
+                complexity_score: 1.0,
             },
-        ]
+        }]
     }
-    
+
     /// GCC compilation phases
     fn gcc_compilation_phases() -> Vec<CompilationPhase> {
         vec![
@@ -507,7 +515,7 @@ impl MetaMemeOntology {
             },
         ]
     }
-    
+
     /// Rust compilation phases
     fn rust_compilation_phases() -> Vec<CompilationPhase> {
         vec![
@@ -534,7 +542,7 @@ impl MetaMemeOntology {
             },
         ]
     }
-    
+
     /// Haskell compilation phases
     fn haskell_compilation_phases() -> Vec<CompilationPhase> {
         vec![
@@ -554,7 +562,7 @@ impl MetaMemeOntology {
             },
         ]
     }
-    
+
     /// Lean4 compilation phases
     fn lean4_compilation_phases() -> Vec<CompilationPhase> {
         vec![
@@ -581,22 +589,25 @@ impl MetaMemeOntology {
             },
         ]
     }
-    
+
     /// Encodes a meme using the prime ontology
     pub fn encode_meme(&self, meme: &Meme) -> Vec<f32> {
         let mut encoding = self.prime_ontology.encode_concept(&meme.value);
-        
+
         // Add language-specific encoding
         if let Some(lang_semantics) = self.language_mappings.get(&meme.typ) {
-            let prime_idx = self.prime_ontology.primes.iter()
+            let prime_idx = self
+                .prime_ontology
+                .primes
+                .iter()
                 .position(|&p| p == lang_semantics.prime_number)
                 .unwrap_or(0);
-            
+
             if prime_idx < encoding.len() {
                 encoding[prime_idx] += 0.5; // Boost language-specific dimension
             }
         }
-        
+
         // Normalize to [0, 1]
         let max_val = encoding.iter().cloned().fold(0.0f32, f32::max);
         if max_val > 0.0 {
@@ -604,51 +615,55 @@ impl MetaMemeOntology {
                 *val /= max_val;
             }
         }
-        
+
         encoding
     }
-    
+
     /// Finds semantic similarity between two memes
     pub fn semantic_similarity(&self, meme1: &Meme, meme2: &Meme) -> f32 {
         let encoding1 = self.encode_meme(meme1);
         let encoding2 = self.encode_meme(meme2);
-        
+
         // Cosine similarity
-        let dot_product: f32 = encoding1.iter().zip(encoding2.iter())
-            .map(|(a, b)| a * b).sum();
-        
+        let dot_product: f32 = encoding1
+            .iter()
+            .zip(encoding2.iter())
+            .map(|(a, b)| a * b)
+            .sum();
+
         let norm1: f32 = encoding1.iter().map(|x| x * x).sum::<f32>().sqrt();
         let norm2: f32 = encoding2.iter().map(|x| x * x).sum::<f32>().sqrt();
-        
+
         if norm1 > 0.0 && norm2 > 0.0 {
             dot_product / (norm1 * norm2)
         } else {
             0.0
         }
     }
-    
+
     /// Translates a meme from one language to another
     pub fn translate_meme(&self, meme: &Meme, target_language: MetaMemes) -> Option<Meme> {
         // Find semantic bridge
-        let bridge = self.semantic_bridges.iter()
+        let bridge = self
+            .semantic_bridges
+            .iter()
             .find(|b| b.source_language == meme.typ && b.target_language == target_language)?;
-        
+
         let mut translated_value = meme.value.clone();
-        
+
         // Apply semantic mappings
         for mapping in &bridge.semantic_mappings {
             if meme.value.contains(&mapping.source_concept) {
-                translated_value = translated_value.replace(&mapping.source_concept, &mapping.target_concept);
+                translated_value =
+                    translated_value.replace(&mapping.source_concept, &mapping.target_concept);
             }
         }
-        
+
         let encoded_concept = self.prime_ontology.encode_concept(&translated_value);
         Some(Meme {
             typ: target_language,
             value: translated_value,
-            prime_encoding: encoded_concept.iter()
-                .map(|&x| x.round() as u64)
-                .collect(),
+            prime_encoding: encoded_concept.iter().map(|&x| x.round() as u64).collect(),
             semantic_vector: encoded_concept,
             ast_structure: None,
             metadata: meme.metadata.clone(),
@@ -730,7 +745,7 @@ mod tests {
                 semantic_category: SemanticCategory::Declaration,
             },
         };
-        
+
         let encoding = ontology.encode_meme(&meme);
         assert_eq!(encoding.len(), 10); // Prime ontology dimension
     }
@@ -756,7 +771,7 @@ mod tests {
                 semantic_category: SemanticCategory::Declaration,
             },
         };
-        
+
         let meme2 = Meme {
             typ: MetaMemes::Rust,
             value: "fn main() {}".to_string(),
@@ -775,7 +790,7 @@ mod tests {
                 semantic_category: SemanticCategory::Declaration,
             },
         };
-        
+
         let similarity = ontology.semantic_similarity(&meme1, &meme2);
         assert!(similarity > 0.0);
         assert!(similarity <= 1.0);

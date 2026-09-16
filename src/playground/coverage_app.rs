@@ -769,4 +769,10 @@ fn get_coverage_data() -> Vec<CoverageEntry> {
     ]
 }
 
-crate::register_plugin!("coverage", "Code coverage viewer", crate::plugin::PluginCategory::Analysis, "📊", || rsx!{ div{"plugin"} });
+crate::register_plugin!(
+    "coverage",
+    "Code coverage viewer",
+    crate::plugin::PluginCategory::Analysis,
+    "📊",
+    || rsx! { div{"plugin"} }
+);
