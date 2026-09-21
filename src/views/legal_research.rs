@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use sensiblaw_reader_model::{
-    mabo_five_stage_registry, AdaptiveExplanationCone, ReaderIntent, ReaderPropositionSpec,
-    ReaderWorldProjection, SourceCoordinate,
+    mabo_five_stage_registry, AdaptiveExplanationCone, ReaderIntent, ReaderPickIntent,
+    ReaderPropositionSpec, ReaderWorldProjection, SankeyIr, SourceCoordinate,
 };
 
 fn intent_label(intent: ReaderIntent) -> &'static str {
@@ -172,6 +172,86 @@ pub fn ProofTopologyRenderer(cone: AdaptiveExplanationCone) -> Element {
     }
 }
 
+
+
+#[component]
+pub fn SankeyRenderer(
+    sankey: SankeyIr,
+    on_pick: EventHandler<ReaderPickIntent>,
+) -> Element {
+    let validation = sankey.validate_count_semantics();
+
+    if let Err(error) = validation {
+        return rsx! {
+            section { class: "rounded border border-red-500 p-3",
+                h2 { class: "font-semibold", "Sankey rejected" }
+                p { class: "text-sm", "{error}" }
+            }
+        };
+    }
+
+    let max_weight = sankey.links.iter().map(|link| link.weight).max().unwrap_or(1);
+
+    rsx! {
+        section { class: "space-y-3",
+            h2 { class: "text-xl font-semibold", "Research flow" }
+            p { class: "text-xs opacity-70",
+                "Widths encode observed/topology counts only; never legal importance or authority."
+            }
+            div { class: "grid md:grid-cols-2 gap-4",
+                div { class: "space-y-2",
+                    for node in sankey.nodes.iter() {
+                        {
+                            let target = node.node_ref.clone();
+                            let target_for_click = target.clone();
+                            rsx! {
+                                button {
+                                    class: "w-full rounded border px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800",
+                                    title: "{target}",
+                                    onclick: move |_| {
+                                        if let Ok(pick) = ReaderPickIntent::new(
+                                            target_for_click.clone(),
+                                            ReaderIntent::ExpandProofCone,
+                                        ) {
+                                            on_pick.call(pick);
+                                        }
+                                    },
+                                    "{node.label}"
+                                }
+                            }
+                        }
+                    }
+                }
+                div { class: "space-y-2",
+                    for link in sankey.links.iter() {
+                        {
+                            let width = ((link.weight.saturating_mul(100)) / max_weight).max(1);
+                            rsx! {
+                                div { class: "rounded border p-2 text-xs space-y-1",
+                                    div {
+                                        code { "{link.from_ref}" }
+                                        span { " → " }
+                                        code { "{link.to_ref}" }
+                                    }
+                                    div { class: "h-2 bg-slate-200 rounded overflow-hidden",
+                                        div {
+                                            class: "h-full bg-slate-600",
+                                            style: "width:{width}%;"
+                                        }
+                                    }
+                                    div {
+                                        "{link.weight} · {link.weight_semantics}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -183,6 +263,16 @@ mod tests {
     }
 
     #[test]
+    #[test]
+    fn visual_pick_stays_reader_intent_plus_target() {
+        let pick =
+            ReaderPickIntent::new("case:fixture", ReaderIntent::ExpandProofCone).unwrap();
+        assert_eq!(pick.target_ref, "case:fixture");
+        assert_eq!(pick.intent, ReaderIntent::ExpandProofCone);
+        assert!(!pick.creates_semantic_authority());
+        assert!(!pick.creates_evidence_payment());
+    }
+
     fn graph_layout_is_deterministic_and_semantically_empty() {
         assert_eq!(graph_position(0, 4), graph_position(0, 4));
         assert_ne!(graph_position(0, 4), graph_position(1, 4));
