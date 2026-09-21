@@ -9,6 +9,10 @@ publish = false
 
 [dependencies]
 
+# SensibLaw reader ABI: read-only semantic projection.  Dioxus consumes this
+# typed contract directly; UI state does not recreate payment/legal semantics.
+sensiblaw-reader-model = { git = "https://github.com/chboishabba/slr.git", branch = "agent/australian-contracts-follow-20260920", package = "sensiblaw-reader-model", features = ["serde"] }
+
 ### git deps, could be submodules
 wallet-adapter = { git = "https://github.com/meta-introspector/SolanaWalletAdapter-zos", branch ="no-template"} # 
 syn-serde = { git = "https://github.com/meta-introspector/syn-serde-rust", branch="main", features = ["json"] }

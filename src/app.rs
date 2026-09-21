@@ -25,6 +25,7 @@ use crate::views::{
     accounts::Accounts, clusters::Clusters, dashboard::Dashboard, extras::Extras,
     source_browser::SourceBrowser, dao_governance::DaoGovernance,
     pastebin_view::Pastebin, p2p_sharing::P2pSharing,
+    legal_research::LegalResearchWorkbench,
 };
 use crate::plugin::PluginBrowser;
 
@@ -100,6 +101,8 @@ pub enum Route {
         P2pSharing(),
         #[route("/plugins")]
         PluginBrowser(),
+        #[route("/legal-research")]
+        LegalResearchWorkbench(),
         // #[feature ("git2")]
         // #[route("/git-parser")]
         // GitParser2(),
