@@ -35,7 +35,7 @@ pub fn canonical_mabo_payment() -> PropositionPayment {
 
 #[derive(Clone, PartialEq, Props)]
 pub struct MaboSemanticReaderProps {
-    #[props(default = Some(canonical_mabo_payment()))]
+    #[props(default = None)]
     pub payment: Option<PropositionPayment>,
 }
 

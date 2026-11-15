@@ -186,7 +186,7 @@ pub fn PlaygroundApp() -> Element {
                     //                    MenuOption::SolFunMeme => rsx!(SolFunMemeApp {}),
                     MenuOption::SolFunMeme => rsx!( div { "SolFunMeme (loading...)" } ),
                     MenuOption::Extractor => rsx!( div { "Extractor (desktop only)" } ),
-                    MenuOption::SemanticReader => rsx!( crate::semantic_reader::mabo::MaboSemanticReader {} ),
+                    MenuOption::SemanticReader => rsx!( crate::semantic_reader::mabo::MaboSemanticReader { payment: None } ),
                             _ => rsx!(div { "TODO"})
                         }
                     }
